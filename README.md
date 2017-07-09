@@ -37,7 +37,7 @@ $ mono deopletefs.exe
 ```
 input
 ```json
-{ "Row" : 0 ,"Col": 1, "Line": ""     , "FilePath" : "../test/abc.fsx", "Source" : "", "Init":"dummy_init"}
+{ "Row" : -9999 ,"Col": -9999, "Line": "", "FilePath" : "../test/abc.fsx", "Source" : "", "Init":"dummy_init"}
 ```
 return
 ```json
