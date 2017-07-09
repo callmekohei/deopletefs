@@ -24,7 +24,7 @@ stdin.
 stdout.
   """
 let inputLines = input.Split('\n')
-let file = "./dummy.fsx"
+let file = "./util/dummy.fsx"
 System.IO.File.WriteAllText(file,input)
 
 let untyped, parsed = parseWithTypeInfo (file, input)
