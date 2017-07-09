@@ -12,7 +12,12 @@ after_success:
   # prepare
   - openssl aes-256-cbc -K $encrypted_b811b6a1fc44_key -iv $encrypted_b811b6a1fc44_iv -in deploy_key.enc -out ~/.ssh/id_rsa -d
   - chmod 600 ~/.ssh/id_rsa
-  - echo -e "Host github.com\n\tStrictHostKeyChecking no" >> ~/.ssh/config
+  - echo -e "Host github.com"                >> ~/.ssh/config
+  - echo -e "\n\tUser git"                   >> ~/.ssh/config
+  - echo -e "\n\tStrictHostKeyChecking no"   >> ~/.ssh/config
+  - echo -e "\n\tIdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+  - echo -e "\n\tIdentitiesOnly yes"         >> ~/.ssh/config
+  - echo -e "\n\tForwardAgent yes"           >> ~/.ssh/config
   - git config --global user.email "callmekohei@gmail.com"
   - git config --global user.name "callmekohei"
   # git operations
