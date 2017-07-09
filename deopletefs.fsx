@@ -5,7 +5,7 @@
 // ===========================================================================
 
 namespace deopletefs
-#load @"./dummyJson.fsx"
+#load @"./util/dummyJson.fsx"
 
 open System
 open System.Collections.Concurrent

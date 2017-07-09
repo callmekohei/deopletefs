@@ -15,6 +15,9 @@ mono .paket/paket.exe install
 SCRIPT_PATH='./deopletefs.fsx'
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
 
+# Create dummyJson.fsx
+fsharpi ./util/create_dummyJson.fsx > ./util/dummyJson.fsx
+
 
 # Create EXE file
 declare -a arr=(
