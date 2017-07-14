@@ -59,8 +59,8 @@ type LanguageAgent(dirtyNotify) =
                     with e -> None
 
                 let results =
-                    if      Option.isSome ary && not (Array.isEmpty (Option.get ary |> fun x -> x.Items))
-                    then    Some (Option.get ary |> fun x -> x.Items)
+                    if Option.isSome ary && not (Array.isEmpty (Option.get ary |> fun x -> x.Items)) then
+                        Some (Option.get ary |> fun x -> x.Items)
                     else
                             let untyped     = checker.ParseFileInProject(postData.FilePath, postData.Source, checkOptions)              |> Async.RunSynchronously
                             let checkAnswer = checker.CheckFileInProject(untyped, postData.FilePath, 0, postData.Source, checkOptions ) |> Async.RunSynchronously
@@ -76,9 +76,10 @@ type LanguageAgent(dirtyNotify) =
                                         |> fun x -> Some x
                                     with e -> None
 
-                                if      Option.isSome ary && not (Array.isEmpty (Option.get ary |> fun x -> x.Items))
-                                then    Some (Option.get ary |> fun x -> x.Items)
-                                else    None 
+                                if Option.isSome ary && not (Array.isEmpty (Option.get ary |> fun x -> x.Items)) then
+                                    Some (Option.get ary |> fun x -> x.Items)
+                                else
+                                    None 
 
                             | _ -> None
                             
@@ -126,17 +127,19 @@ module Util =
         s.Split([|'<';'>'|])
         |> Array.filter ( fun s -> s <> "" )
         |> fun arr ->
-           if     Array.last arr = "."
-           then   Array.head arr
-           else   (Array.tail arr).[0]
+            if Array.last arr = "." then
+                Array.head arr
+            else
+                (Array.tail arr).[0]
 
     let nameSpaceArrayImpl ( s:string) :string array =
         s.Split('.')
         |> Array.filter ( fun s -> s <> "" )
         |> fun arr ->
-            if    Array.last arr = ""
-            then  Array.splitAt (arr.Length - 1) arr |> fst
-            else  arr
+            if Array.last arr = "" then
+                Array.splitAt (arr.Length - 1) arr |> fst
+            else
+                arr
 
     let nameSpaceArray (s:string) : string array =
         s
@@ -144,11 +147,12 @@ module Util =
         |> Array.filter ( fun s -> s <> "" )
         |> Array.last
         |> fun ( s:string) ->
-            if    s.Contains("<")
-            then  angleBracket s |> nameSpaceArrayImpl
-            elif  s.Contains(".")
-            then  nameSpaceArrayImpl s
-            else  [|s|]
+            if s.Contains("<") then
+                angleBracket s |> nameSpaceArrayImpl
+            elif s.Contains(".") then
+                nameSpaceArrayImpl s
+            else
+                [|s|]
         |> Array.map( fun s -> s.Replace("(","").Replace(")","") )
 
     let previousDot (s:string) =
@@ -180,15 +184,15 @@ module  FSharpIntellisence  =
         
         let x = agent.GetDeclaration( postData, ( nameSpace, word ) ) |> Async.RunSynchronously
 
-        if      Option.isNone x
-        then    msgForDeoplete "Parsing did not finish..."
+        if Option.isNone x then
+            msgForDeoplete "Parsing did not finish..."
         else
-                x.Value
-                |> Array.fold ( fun state x ->
-                    let dt : JsonFormat = { word = x.Name; info = match x.DescriptionText with FSharpToolTipText xs -> List.map extractGroupTexts xs }
-                    state + "\n" + JsonConvert.SerializeObject ( dt )
-                    ) ""
-                |> fun s -> s.Trim()
+            x.Value
+            |> Array.fold ( fun state x ->
+                let dt : JsonFormat = { word = x.Name; info = match x.DescriptionText with FSharpToolTipText xs -> List.map extractGroupTexts xs }
+                state + "\n" + JsonConvert.SerializeObject ( dt )
+                ) ""
+            |> fun s -> s.Trim()
 
 
     let initfirst (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : unit =
@@ -257,9 +261,10 @@ module  FSharpIntellisence  =
     let oneWordHints (dic:ConcurrentDictionary<string,string>)  (str:string) : string =
         
         let s =
-            if      Regex.Match(str,"typeof<.").Success
-            then    str.Substring( str.Length - 1 )
-            else    str.Substring(0)
+            if Regex.Match(str,"typeof<.").Success then
+                str.Substring( str.Length - 1 )
+            else
+                str.Substring(0)
 
 
         let keyword = """{"word":""" + "\"" + s.ToLower()
@@ -267,12 +272,11 @@ module  FSharpIntellisence  =
         |> fun str -> str.Split('\n')
         |> Array.filter ( fun str -> str.ToLower().Contains( keyword ) )
         |> fun ary -> 
-            if      Array.isEmpty ary
-            then   
-                    ""
+            if Array.isEmpty ary then
+                ""
             else
-                    ary |> Array.reduce ( fun a b -> a + "\n" + b )
-                        |> fun s -> s.TrimEnd()
+                ary |> Array.reduce ( fun a b -> a + "\n" + b )
+                |> fun s -> s.TrimEnd()
 
 
     let attributeHints (dic:ConcurrentDictionary<string,string>) : string =
@@ -287,54 +291,50 @@ module  FSharpIntellisence  =
         postData.Line.Split(' ')
         |> Array.filter ( fun s -> s <> "" )
         |> fun ary ->
-               if       Array.contains "[<" ary  && not ( Array.contains ">]" ary )
-               then     attributeHints dic
-               else
-                        oneWordHints   dic  ( Array.last ary )
+            if Array.contains "[<" ary  && not ( Array.contains ">]" ary ) then
+                attributeHints dic
+            else
+                oneWordHints   dic  ( Array.last ary )
 
 
     let autocomplete (s:string) (agent:LanguageAgent) ( dic :ConcurrentDictionary<string,string> )  : string =
         
-        /// postData.Col is cursor position. not . position! ( eg. "abc". ---> postData.Col:7 . position: 6 )
         let postData = JsonConvert.DeserializeObject<PostData>(s)
 
         let main () =
 
             /// update condition of open keyword
-            if      ( openCount( postData.Line ) < 1 ) && ( int(dic.Item("openCount")) <> openCount( postData.Source ) )
-            then 
-
-                    dic.TryUpdate( "openCount"  , string( openCount( postData.Source ))          , dic.Item("openCount")  )  |> ignore 
-                    dic.TryUpdate( "Observable" , jsonStrings agent postData [|"Observable"|] "" , dic.Item("Observable")  ) |> ignore 
-                    dic.TryUpdate( "OneWordHint", jsonStrings agent postData [||] ""             , dic.Item("OneWordHint") ) |> ignore
+            if ( openCount( postData.Line ) < 1 ) && ( int(dic.Item("openCount")) <> openCount( postData.Source ) ) then
+                Debug.WriteLine("changed!")
+                dic.TryUpdate( "openCount"  , string( openCount( postData.Source ))          , dic.Item("openCount")  )  |> ignore 
+                dic.TryUpdate( "Observable" , jsonStrings agent postData [|"Observable"|] "" , dic.Item("Observable")  ) |> ignore 
+                dic.TryUpdate( "OneWordHint", jsonStrings agent postData [||] ""             , dic.Item("OneWordHint") ) |> ignore
             
             let s = postData.Line.Replace("("," ").Split(' ')
                     |> Array.filter ( fun s -> s <> "" )
                     |> Array.last
 
-            if         s.StartsWith(".")                       /// . .. ... ....
-                    || (Regex.Match(s,"^.*\.\.+?$")).Success   /// List.. List... List....
-            then
-                    msgForDeoplete "" 
+            /// . .. ... .... List.. List... List....
+            if  s.StartsWith(".") || (Regex.Match(s,"^.*\.\.+?$")).Success then
+                msgForDeoplete "" 
             else
-                    if      s.Contains(".")
-                    then
-                            if      s.EndsWith(".")
-                            then    dotHints agent dic postData
-                            else
-                                    postData.Line <- previousDot( s )
-                                    dotHints agent dic postData
-                    else    
-                            oneWordOrAttributeHints dic postData
+                if s.Contains(".") then
+                    if  s.EndsWith(".") then
+                        dotHints agent dic postData
+                    else
+                        postData.Line <- previousDot( s )
+                        dotHints agent dic postData
+                else    
+                    oneWordOrAttributeHints dic postData
 
-        if      postData.Init = "dummy_init"
-        then    initfirst agent dic postData
-                msgForDeoplete "finish dummy initialize!"
-        elif    postData.Init = "real_init"
-        then    initSecond agent dic postData |> Async.Start
-                msgForDeoplete "finish real initialize!"
-        else   
-                main () 
+        if postData.Init = "dummy_init" then
+            initfirst agent dic postData
+            msgForDeoplete "finish dummy initialize!"
+        elif postData.Init = "real_init" then
+            initSecond agent dic postData |> Async.Start
+            msgForDeoplete "finish real initialize!"
+        else
+            main () 
 
 
 module InteractiveConsole =
