@@ -20,7 +20,7 @@ open Microsoft.FSharp.Compiler.SourceCodeServices
 open Newtonsoft.Json
 
 
-type PostData   = { Row:int; mutable Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
+type PostData   = { Row:int; Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
 type JsonFormat = { word : string; info: string list list  }
 
 
@@ -150,6 +150,13 @@ module Util =
             then  nameSpaceArrayImpl s
             else  [|s|]
         |> Array.map( fun s -> s.Replace("(","").Replace(")","") )
+
+    let previousDot (s:string) =
+        s.Split('.')
+        |> fun arr -> Array.splitAt (Array.length arr - 1 ) arr
+        |> fst
+        |> Array.reduce ( fun a b -> a + "." + b )
+        |> fun s -> s + "."
 
     let extractGroupTexts = function
         | FSharpToolTipElement.None                    -> []
@@ -313,15 +320,9 @@ module  FSharpIntellisence  =
                     if      s.Contains(".")
                     then
                             if      s.EndsWith(".")
-                            then   
-                                    postData.Col <- postData.Col - 1 // to . position from cursor position.
-                                    dotHints agent dic postData
-                            else    s.Split('.')
-                                    |> fun arr -> Array.splitAt (Array.length arr - 1 ) arr
-                                    |> fst
-                                    |> Array.reduce ( fun a b -> a + "." + b )
-                                    |> fun s -> s + "."
-                                    |> fun str -> postData.Line <- str
+                            then    dotHints agent dic postData
+                            else
+                                    postData.Line <- previousDot( s )
                                     dotHints agent dic postData
                     else    
                             oneWordOrAttributeHints dic postData
