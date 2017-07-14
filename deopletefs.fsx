@@ -20,7 +20,7 @@ open Microsoft.FSharp.Compiler.SourceCodeServices
 open Newtonsoft.Json
 
 
-type PostData   = { mutable Row:int; mutable Col:int; mutable Line:string; FilePath:string; mutable Source:string; Init:string }
+type PostData   = { Row:int; mutable Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
 type JsonFormat = { word : string; info: string list list  }
 
 
@@ -212,27 +212,28 @@ module  FSharpIntellisence  =
             |> Array.iter ( fun (s:string) ->
                 dic.TryUpdate( s, jsonStrings agent postData [|s|] "", dic.Item(s) ) |> ignore )
 
-            let tmpRow    = postData.Row
-            let tmpCol    = postData.Col
-            let tmpLine   = postData.Line
-            let tmpSource = postData.Source
+            let stdoutPostData : PostData = {
+                Row = 1
+                Col = 7
+                Line = "stdout."
+                FilePath = postData.FilePath
+                Source = "stdout."
+                Init = postData.Init
+            }
 
-            postData.Row    <- 1 
-            postData.Col    <- 7
-            postData.Line   <- "stdout."
-            postData.Source <- "stdout." 
-            dic.TryUpdate( "stdout" , jsonStrings agent postData [|"Microsoft";"FSharp";"Core";"Operators";"stdout"|] "" , dic.Item("stdout") ) |> ignore
+            dic.TryUpdate( "stdout" , jsonStrings agent stdoutPostData [|"Microsoft";"FSharp";"Core";"Operators";"stdout"|] "" , dic.Item("stdout") ) |> ignore
 
-            postData.Row    <- 1 
-            postData.Col    <- 6
-            postData.Line   <- "stdin."
-            postData.Source <- "stdin."
-            dic.TryUpdate( "stdin"  , jsonStrings agent postData [|"Microsoft";"FSharp";"Core";"Operators";"stdin"|]  "" , dic.Item("stdin")  ) |> ignore
-
-            postData.Row    <- tmpRow
-            postData.Col    <- tmpCol
-            postData.Line   <- tmpLine
-            postData.Source <- tmpSource
+            let stdinPostData : PostData = {
+                Row = 1
+                Col = 6
+                Line = "stdin."
+                FilePath = postData.FilePath
+                Source = "stdin."
+                Init = postData.Init
+            }
+            
+            dic.TryUpdate( "stdin"  , jsonStrings agent stdinPostData [|"Microsoft";"FSharp";"Core";"Operators";"stdin"|]  "" , dic.Item("stdin")  ) |> ignore
+        
         }
 
 
