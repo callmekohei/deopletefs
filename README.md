@@ -1,4 +1,4 @@
-
+[![MIT-LICENSE](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/callmekohei/deopletefs/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/callmekohei/deopletefs.svg?branch=master)](https://travis-ci.org/callmekohei/deopletefs)
 
 
@@ -58,6 +58,4 @@ return
 ```
 
 
-## LICENCE  
 
-The MIT License (MIT)
