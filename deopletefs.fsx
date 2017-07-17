@@ -261,7 +261,7 @@ module  FSharpIntellisence  =
     let oneWordHints (dic:ConcurrentDictionary<string,string>)  (str:string) : string =
         
         let s =
-            if Regex.Match(str,"typeof<.").Success then
+            if Regex.Match(str,"typeof<.|.*\(.|.*\[.|.*<.|.*:.").Success then
                 str.Substring( str.Length - 1 )
             else
                 str.Substring(0)
