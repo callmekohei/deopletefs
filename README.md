@@ -37,7 +37,7 @@ $ mono deopletefs.exe
 ```
 input
 ```json
-{ "Row" : -9999 ,"Col": -9999, "Line": "", "FilePath" : "../test/abc.fsx", "Source" : "", "Init":"dummy_init"}
+{ "Row" : -9999 ,"Col": -9999, "Line": "", "FilePath" : "../test/dummy.fsx", "Source" : "", "Init":"dummy_init"}
 ```
 return
 ```json
@@ -45,7 +45,7 @@ return
 ```
 input
 ```json
-{ "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "../test/abc.fsx", "Source" : "", "Init":"false"}
+{ "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "../test/dummy.fsx", "Source" : "", "Init":"false"}
 ```
 return
 ```json
@@ -55,6 +55,10 @@ return
 {"word":"averageBy" , "info":[["val averageBy : projection:('T -> 'U) -> list:'T list -> 'U (requires member ( + ) and member DivideByInt and member get_Zero)"]]}
 {"word":"choose"    , "info":[["val choose : chooser:('T -> 'U option) -> list:'T list -> 'U list"]]}
 ...
+```
+input
+```
+quit
 ```
 
 
