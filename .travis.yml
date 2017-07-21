@@ -21,10 +21,10 @@ after_success:
   - git config --global user.email "callmekohei@gmail.com"
   - git config --global user.name "callmekohei"
   # git operations
-  - ls
+  - ls ./
   - cd ..
   - git clone git@github.com:callmekohei/deoplete-fsharp-bin.git
-  - ls
+  - ls ./
   - rm -rf ./deoplete-fsharp-bin/bin_deopletefs
   - rm -rf ./deoplete-fsharp-bin/tools
   - cp -rf ./deopletefs/bin_deopletefs ./deoplete-fsharp-bin/
