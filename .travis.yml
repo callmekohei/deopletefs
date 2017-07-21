@@ -30,6 +30,5 @@ after_success:
   #
   - cd ./deoplete-fsharp-bin
   - git add --all
-  - git add .
   - git commit -m "by Travis CI (JOB $TRAVIS_JOB_NUMBER)"
   - git push origin master
