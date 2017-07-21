@@ -26,7 +26,7 @@ after_success:
   - rm -rf ./deoplete-fsharp-bin/bin_deopletefs
   - rm -rf ./deoplete-fsharp-bin/tools
   - cp -rf ./deopletefs/bin_deopletefs ./deoplete-fsharp-bin/
-  - cp -rf ./deopletefs/tools ./tools/
+  - cp -rf ./deopletefs/tools          ./deoplete-fsharp-bin/
   #
   - cd ./deoplete-fsharp-bin
   - git add --all
