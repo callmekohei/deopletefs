@@ -10,8 +10,12 @@
 !.travis.yml
 !deploy_key.enc
 !util/*
+!test/Persimmon.Console.exe.config
+!test/test.fsx
+!test/dummy.fsx
 
-
+test/test.dll
+test/tools/*
 .paket/paket.exe
 bin*/
 tools/

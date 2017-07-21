@@ -7,6 +7,7 @@ mono:
 
 script:
     - bash build.bash
+    - bash test.bash
 
 after_success:
   # prepare
