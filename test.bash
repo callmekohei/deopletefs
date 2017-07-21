@@ -10,5 +10,5 @@ cp -rf $SCRIPT_DIR'/packages/Persimmon.Console/tools' ./test/
 cp -rf ./bin_deopletefs ./test/tools/
 cp -f  ./test/Persimmon.Console.exe.config ./test/tools/
 
-fsharpc -a ./test/test.fsx
+fsharpc -a ./test/test.fsx -o ./test/test.dll
 mono ./test/tools/Persimmon.Console.exe ./test/test.dll
