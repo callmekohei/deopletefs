@@ -41,7 +41,7 @@ let ``test of nameSpaceArray`` = test {
 
 let ``test of previousDot`` = test {
     // do! assertEquals "abc" ( previousDot "System" ) // error
-    do! assertEquals "System"                               ( previousDot "System.Text")
+    do! assertEquals "System."                               ( previousDot "System.Text")
     do! assertEquals "System.Text."                          ( previousDot "System.Text.RegularExpressions")
     do! assertEquals "System.Text.RegularExpressions."       ( previousDot "System.Text.RegularExpressions.Regex")
     do! assertEquals "System.Text.RegularExpressions.Regex." ( previousDot "System.Text.RegularExpressions.Regex.Split")
