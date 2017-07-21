@@ -11,12 +11,16 @@
 !deploy_key.enc
 !util/*
 
+
+.paket/paket.exe
 bin*/
+tools/
 packages/
 deopletefs_deoplete-fsharp_temporary_file.fsx
 deploy_key
 deploy_key.pub
 util/dummyJson.fsx
+
 
 ### https://raw.github.com/github/gitignore/0f88fa75def7ed7d96935b8630793e51953df9b0/Global/macos.gitignore
 

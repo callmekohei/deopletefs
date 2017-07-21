@@ -79,4 +79,4 @@ fi
 touch ./bin_deopletefs/log.txt
 
 # add perssimon
-cp -rf $SCRIPT_DIR'/packages/Persimmon.Console/tools' ./bin_deopletefs/
+cp -rf $SCRIPT_DIR'/packages/Persimmon.Console/tools' ./
