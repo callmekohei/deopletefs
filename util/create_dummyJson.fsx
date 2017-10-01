@@ -33,12 +33,13 @@ let decls(keyword, col, row) =
 
 type JsonFormat = { word : string; info: string list list  }
 
+
+// https://github.com/fsharp/FSharp.Compiler.Service/blob/master/src/fsharp/symbols/SymbolHelpers.fs#L232
 let extractGroupTexts = function
-    | FSharpToolTipElement.None                    -> []
-    | FSharpToolTipElement.Single (a,b)            -> [a]
-    | FSharpToolTipElement.SingleParameter (a,b,c) -> []
-    | FSharpToolTipElement.Group xs                -> xs |> List.map fst
-    | FSharpToolTipElement.CompositionError s      -> [s]
+    | FSharpToolTipElement.None -> []
+    | FSharpToolTipElement.CompositionError s -> [s]
+    | FSharpToolTipElement.Group (xs:FSharpToolTipElementData<string> list) -> xs |> List.map( fun (x:FSharpToolTipElementData<string>) -> x.MainDescription )
+
 
 let body =
     [ []; ["System"] ; ["List"] ; ["Set"] ; ["Seq"] ; ["Array"] ; ["Map"] ; ["Option"] ; ["Observable"] ; ["Microsoft";"FSharp";"Core";"Operators";"stdout"] ; ["Microsoft";"FSharp";"Core";"Operators";"stdin"] ]

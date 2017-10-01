@@ -162,12 +162,11 @@ module Util =
         |> Array.reduce ( fun a b -> a + "." + b )
         |> fun s -> s + "."
 
+    // https://github.com/fsharp/FSharp.Compiler.Service/blob/master/src/fsharp/symbols/SymbolHelpers.fs#L232
     let extractGroupTexts = function
-        | FSharpToolTipElement.None                    -> []
-        | FSharpToolTipElement.Single (a,b)            -> [a]
-        | FSharpToolTipElement.SingleParameter (a,b,c) -> []
-        | FSharpToolTipElement.Group xs                -> xs |> List.map fst
-        | FSharpToolTipElement.CompositionError s      -> [s]
+        | FSharpToolTipElement.None -> []
+        | FSharpToolTipElement.CompositionError s -> [s]
+        | FSharpToolTipElement.Group (xs:FSharpToolTipElementData<string> list) -> xs |> List.map( fun (x:FSharpToolTipElementData<string>) -> x.MainDescription )
 
     let openCount (s:string) : int =
         Regex.Matches(s,"^\s*open", RegexOptions.Multiline).Count
