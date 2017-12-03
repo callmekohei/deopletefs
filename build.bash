@@ -77,6 +77,3 @@ fi
 
 # add log.txt
 touch ./bin_deopletefs/log.txt
-
-# add perssimon
-cp -rf $SCRIPT_DIR'/packages/Persimmon.Console/tools' ./
