@@ -330,6 +330,9 @@ module  FSharpIntellisence  =
 
         let main () =
 
+            // For Windows
+            // System.Threading.Thread.Sleep(25)
+
             updateOpenKeyword ()
             
             let s = postData.Line.Replace("("," ").Split(' ')
