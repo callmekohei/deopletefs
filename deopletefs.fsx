@@ -15,18 +15,19 @@ open System.Text.RegularExpressions
 #r @"./packages/FSharp.Compiler.Service/lib/net45/FSharp.Compiler.Service.dll"
 open Microsoft.FSharp.Compiler
 open Microsoft.FSharp.Compiler.SourceCodeServices
+open Microsoft.FSharp.Compiler.QuickParse
 
 #r @"./packages/Newtonsoft.Json/lib/net45/Newtonsoft.Json.dll"
 open Newtonsoft.Json
 
 
-type PostData   = { Row:int; Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
+type PostData   = { mutable Row:int; Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
 type JsonFormat = { word : string; info: string list list  }
 
 
 module ServiceSettings =
     let internal getEnvInteger e dflt = match System.Environment.GetEnvironmentVariable(e) with null -> dflt | t -> try int t with _ -> dflt
-    let blockingTimeout = getEnvInteger "FSharpBinding_BlockingTimeout" 250
+    let blockingTimeout = getEnvInteger "FSharpBinding_BlockingTimeout" 500
     let maximumTimeout  = getEnvInteger "FSharpBinding_MaxTimeout" 5000
 
 
@@ -39,50 +40,41 @@ type LanguageAgent(dirtyNotify) =
         checker.BeforeBackgroundFileCheck.Add dirtyNotify
         checker
 
+
+    let parseWithTypeInfo (file, input) =
+        let checkOptions, _errors   = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
+        let parsingOptions, _errors = checker.GetParsingOptionsFromProjectOptions(checkOptions)
+        let untypedRes              = checker.ParseFile(file, input, parsingOptions) |> Async.RunSynchronously
+
+        match checker.CheckFileInProject(untypedRes, file, 0, input, checkOptions) |> Async.RunSynchronously with
+        | FSharpCheckFileAnswer.Succeeded(res) -> untypedRes, res
+        | res -> failwithf "Parsing did not finish... (%A)" res
+
+
+    let getDecls (postData:PostData, partialName) = async {
+            let untyped, parsed = parseWithTypeInfo (postData.FilePath, postData.Source)
+            return! parsed.GetDeclarationListInfo(Some untyped, postData.Row, postData.Line, partialName, (fun () -> []))
+        }
+
+
     let mbox = MailboxProcessor.Start(fun mbox ->
         async { 
              while true do
                 
-                let! (postData, arr, checkOptions, reply: AsyncReplyChannel<_> ) = mbox.Receive()
+                let! (postData, partialName, checkOptions, reply: AsyncReplyChannel<_> ) = mbox.Receive()
 
                 let blockingTimeout_ms = if postData.Init = "real_init" then ServiceSettings.maximumTimeout else ServiceSettings.blockingTimeout
 
-                let! untypedRes, typedRes = checker.GetBackgroundCheckResultsForFileInProject( postData.FilePath, checkOptions )
-
-                let ary =
+                let results =
                     try
                         Async.RunSynchronously (
-                            typedRes.GetDeclarationListInfo ( Some untypedRes, postData.Row , postData.Col , postData.Line, (fst arr) |> Array.toList, (snd arr), fun () -> [] )
+                              getDecls( postData, partialName )
                             , timeout = blockingTimeout_ms
                         )
-                        |> fun x -> Some x
-                    with e -> None
+                        |> fun x -> Some x.Items
+                    with e ->
+                        None
 
-                let results =
-                    if Option.isSome ary && not (Array.isEmpty (Option.get ary |> fun x -> x.Items)) then
-                        Some (Option.get ary |> fun x -> x.Items)
-                    else
-                            let untyped     = checker.ParseFileInProject(postData.FilePath, postData.Source, checkOptions)              |> Async.RunSynchronously
-                            let checkAnswer = checker.CheckFileInProject(untyped, postData.FilePath, 0, postData.Source, checkOptions ) |> Async.RunSynchronously
-                            
-                            match checkAnswer with
-                            | FSharpCheckFileAnswer.Succeeded(typed) ->
-                                let ary =
-                                    try 
-                                        Async.RunSynchronously (
-                                            typed.GetDeclarationListInfo ( Some untyped, postData.Row , postData.Col , postData.Line, (fst arr) |> Array.toList, (snd arr), fun () -> [] )
-                                            , timeout = blockingTimeout_ms
-                                        )
-                                        |> fun x -> Some x
-                                    with e -> None
-
-                                if Option.isSome ary && not (Array.isEmpty (Option.get ary |> fun x -> x.Items)) then
-                                    Some (Option.get ary |> fun x -> x.Items)
-                                else
-                                    None 
-
-                            | _ -> None
-                            
                 reply.Reply results
         } 
     )
@@ -93,14 +85,11 @@ type LanguageAgent(dirtyNotify) =
             , timeout = ServiceSettings.maximumTimeout
         )
      
-    member x.GetDeclaration( postData, arr ) =
+    member x.GetDeclaration( postData, partialName ) =
          async {
             let opts = x.GetCheckerOptions( postData )
-            return! mbox.PostAndAsyncReply(fun reply -> postData, arr, fst(opts), reply)
+            return! mbox.PostAndAsyncReply(fun reply -> postData, partialName, fst(opts), reply)
          }
-
-    member x.ClearLanguageServiceRootCachesAndCollectAndFinalizeAllTransients() =
-        checker.ClearLanguageServiceRootCachesAndCollectAndFinalizeAllTransients
 
 
 type PrinterAgent() =
@@ -179,9 +168,9 @@ module Util =
 module  FSharpIntellisence  =
     open Util
 
-    let jsonStrings (agent:LanguageAgent) (postData:PostData) (nameSpace: string [] )  (word:string) : string =
-        
-        let x = agent.GetDeclaration( postData, ( nameSpace, word ) ) |> Async.RunSynchronously
+    let jsonStrings (agent:LanguageAgent) (postData:PostData) (partialName:PartialLongName) : string =
+
+        let x = agent.GetDeclaration( postData, partialName ) |> Async.RunSynchronously
 
         if Option.isNone x then
             msgForDeoplete "Parsing did not finish..."
@@ -191,59 +180,61 @@ module  FSharpIntellisence  =
                 let dt : JsonFormat = { word = x.Name; info = match x.DescriptionText with FSharpToolTipText xs -> List.map extractGroupTexts xs }
                 state + "\n" + JsonConvert.SerializeObject ( dt )
                 ) ""
-            |> fun s -> s.Trim()
+            |> fun s ->
+                s.Trim()
 
 
     let initfirst (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : unit =
 
         dic.GetOrAdd( "filePath"    , postData.FilePath )                       |> ignore
         dic.GetOrAdd( "openCount"   , string(openCount(postData.Source)) )      |> ignore
-        dic.GetOrAdd( "DotHints"    , msgForDeoplete "" )                       |> ignore
 
-        dic.GetOrAdd( "System"      , dummyJson.dummy.dummy.Item("System"))     |> ignore
-        dic.GetOrAdd( "OneWordHint" , dummyJson.dummy.dummy.Item("OneWord"))    |> ignore
-        dic.GetOrAdd( "List"        , dummyJson.dummy.dummy.Item("List"))       |> ignore
-        dic.GetOrAdd( "Set"         , dummyJson.dummy.dummy.Item("Set"))        |> ignore
-        dic.GetOrAdd( "Seq"         , dummyJson.dummy.dummy.Item("Seq"))        |> ignore
         dic.GetOrAdd( "Array"       , dummyJson.dummy.dummy.Item("Array"))      |> ignore
+        dic.GetOrAdd( "List"        , dummyJson.dummy.dummy.Item("List"))       |> ignore
         dic.GetOrAdd( "Map"         , dummyJson.dummy.dummy.Item("Map"))        |> ignore
-        dic.GetOrAdd( "Option"      , dummyJson.dummy.dummy.Item("Option"))     |> ignore
         dic.GetOrAdd( "Observable"  , dummyJson.dummy.dummy.Item("Observable")) |> ignore
-        dic.GetOrAdd( "stdout"      , dummyJson.dummy.dummy.Item("stdout"))     |> ignore
+        dic.GetOrAdd( "OneWordHint" , dummyJson.dummy.dummy.Item("OneWord"))    |> ignore
+        dic.GetOrAdd( "Option"      , dummyJson.dummy.dummy.Item("Option"))     |> ignore
+        dic.GetOrAdd( "Seq"         , dummyJson.dummy.dummy.Item("Seq"))        |> ignore
+        dic.GetOrAdd( "Set"         , dummyJson.dummy.dummy.Item("Set"))        |> ignore
+        dic.GetOrAdd( "System"      , dummyJson.dummy.dummy.Item("System"))     |> ignore
+        dic.GetOrAdd( "stderr"      , dummyJson.dummy.dummy.Item("stderr"))     |> ignore
         dic.GetOrAdd( "stdin"       , dummyJson.dummy.dummy.Item("stdin"))      |> ignore
+        dic.GetOrAdd( "stdout"      , dummyJson.dummy.dummy.Item("stdout"))     |> ignore
 
 
     let initSecond (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : Async<unit> =
+
+        let tryUpdateDic (label:string) ( line:string) (col:int) =
+            postData.Line <- line
+            let partialName = QuickParse.GetPartialLongNameEx(line, col) 
+            dic.TryUpdate( label, jsonStrings agent postData partialName, dic.Item(label) ) |> ignore
+
         async{
-            dic.TryUpdate( "System"      , jsonStrings agent postData [|"System"|] "", dic.Item("System")      ) |> ignore
-            dic.TryUpdate( "OneWordHint" , jsonStrings agent postData [||] ""        , dic.Item("OneWordHint") ) |> ignore
-
-            [| "List" ; "Set" ; "Seq" ; "Array" ; "Map" ; "Option" ; "Observable" |]
-            |> Array.iter ( fun (s:string) ->
-                dic.TryUpdate( s, jsonStrings agent postData [|s|] "", dic.Item(s) ) |> ignore )
-
-            let stdoutPostData : PostData = {
-                Row = 1
-                Col = 7
-                Line = "stdout."
-                FilePath = postData.FilePath
-                Source = "stdout."
-                Init = postData.Init
-            }
-
-            dic.TryUpdate( "stdout" , jsonStrings agent stdoutPostData [|"Microsoft";"FSharp";"Core";"Operators";"stdout"|] "" , dic.Item("stdout") ) |> ignore
-
-            let stdinPostData : PostData = {
-                Row = 1
-                Col = 6
-                Line = "stdin."
-                FilePath = postData.FilePath
-                Source = "stdin."
-                Init = postData.Init
-            }
+            let tmpLine = postData.Line
+            let tmpRow  = postData.Row
+            postData.Row <- postData.Source.Split('\n').Length
             
-            dic.TryUpdate( "stdin"  , jsonStrings agent stdinPostData [|"Microsoft";"FSharp";"Core";"Operators";"stdin"|]  "" , dic.Item("stdin")  ) |> ignore
-        
+            [
+                // label          line                     col
+                // ---------------------------------------------
+                ( "Array"       , "Array."                , 5  )
+                ( "List"        , "List."                 , 4  )
+                ( "Map"         , "Map."                  , 3  )
+                ( "Observable"  , "Observable."           , 10 )
+                ( "OneWordHint" , ""                      , 0  )
+                ( "Option"      , "Option."               , 6  )
+                ( "Seq"         , "Seq."                  , 3  )
+                ( "Set"         , "Set."                  , 3  )
+                ( "System"      , "System."               , 6  )
+                ( "stderr"      , "System.Console.Error." , 20 )
+                ( "stdin"       , "System.Console.In."    , 17 )
+                ( "stdout"      , "System.Console.Out."   , 18 )
+            ]
+            |> List.iter( fun (label,line,col) -> tryUpdateDic label line col )
+
+            postData.Row  <- tmpRow
+            postData.Line <- tmpLine
         }
 
 
@@ -252,10 +243,21 @@ module  FSharpIntellisence  =
         let arr = nameSpaceArray postData.Line
 
         match Array.last arr with
-        | "System" | "List" | "Set" | "Seq" | "Array" | "Map" | "Option" |"Observable" | "stdout" | "stdin" ->
+        | "Array"
+        | "List"
+        | "Map"
+        | "Observable"
+        | "Option"
+        | "Seq"
+        | "Set"
+        | "System"
+        | "stderr"
+        | "stdin"
+        | "stdout" ->
             dic.Item( Array.last arr )
         | _ ->
-            jsonStrings agent postData arr ""
+            jsonStrings agent postData (QuickParse.GetPartialLongNameEx(postData.Line, postData.Col))
+
 
     let oneWordHints (dic:ConcurrentDictionary<string,string>)  (str:string) : string =
         
@@ -300,14 +302,32 @@ module  FSharpIntellisence  =
         
         let postData = JsonConvert.DeserializeObject<PostData>(s)
 
-        let main () =
+        let tryUpdateDic (label:string) ( line:string) (col:int) =
+            postData.Line <- line
+            let partialName = QuickParse.GetPartialLongNameEx(line, col)
+            dic.TryUpdate( label, jsonStrings agent postData partialName, dic.Item(label) ) |> ignore
 
-            /// update condition of open keyword
+        // update dictionary when open keyword appears.
+        let updateOpenKeyword () =
             if ( openCount( postData.Line ) < 1 ) && ( int(dic.Item("openCount")) <> openCount( postData.Source ) ) then
                 Debug.WriteLine("changed!")
-                dic.TryUpdate( "openCount"  , string( openCount( postData.Source ))          , dic.Item("openCount")  )  |> ignore 
-                dic.TryUpdate( "Observable" , jsonStrings agent postData [|"Observable"|] "" , dic.Item("Observable")  ) |> ignore 
-                dic.TryUpdate( "OneWordHint", jsonStrings agent postData [||] ""             , dic.Item("OneWordHint") ) |> ignore
+
+                let tmpLine = postData.Line
+                let tmpRow  = postData.Row
+                postData.Row <- postData.Source.Split('\n').Length
+
+                dic.TryUpdate( "openCount", string( openCount( postData.Source )), dic.Item("openCount") ) |> ignore
+
+                [ ("OneWordHint","",0);("System","System.",6);("Observable","Observable.",10)]
+                |> List.iter( fun (label,line,col) -> tryUpdateDic label line col )
+
+                postData.Row  <- tmpRow
+                postData.Line <- tmpLine
+
+
+        let main () =
+
+            updateOpenKeyword ()
             
             let s = postData.Line.Replace("("," ").Split(' ')
                     |> Array.filter ( fun s -> s <> "" )
@@ -326,14 +346,19 @@ module  FSharpIntellisence  =
                 else    
                     oneWordOrAttributeHints dic postData
 
+
         if postData.Init = "dummy_init" then
+            Debug.WriteLine("dummy_init initialize")
             initfirst agent dic postData
+            Debug.WriteLine("finish dummy_init initialize")
             msgForDeoplete "finish dummy initialize!"
         elif postData.Init = "real_init" then
+            Debug.WriteLine("real_init initialize")
             initSecond agent dic postData |> Async.Start
+            Debug.WriteLine("finish real_init initialize")
             msgForDeoplete "finish real initialize!"
         else
-            main () 
+            main ()
 
 
 module InteractiveConsole =

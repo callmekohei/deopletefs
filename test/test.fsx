@@ -1,12 +1,15 @@
-#r @"./tools/bin_deopletefs/deopletefs.exe"
+#r "../bin_deopletefs/deopletefs.exe"
 open deopletefs.Util
 open deopletefs.InteractiveConsole
 open deopletefs.FSharpIntellisence
 
-#r @"./tools/bin_deopletefs/Newtonsoft.Json.dll"
+#r "../packages/Newtonsoft.Json/lib/net45/Newtonsoft.Json.dll"
 open Newtonsoft.Json
 
-#r @"./tools/Persimmon.dll"
+#r "../packages/Persimmon/lib/net45/Persimmon.dll"
+#r "../packages/Persimmon.Runner/lib/net40/Persimmon.Runner.dll"
+#r "../packages/Persimmon.Script/lib/net45/Persimmon.Script.dll"
+open System.Reflection
 open Persimmon
 open UseTestNameByReflection
 
@@ -83,3 +86,7 @@ let ``test of autocomplete`` = test {
     do! assertEquals "abs" ( JsonConvert.DeserializeObject<deopletefs.JsonFormat>(filteredByA).word )
 
 }
+
+/// print out test report.
+new Persimmon.ScriptContext()
+|> FSI.collectAndRun( fun _ -> Assembly.GetExecutingAssembly() )

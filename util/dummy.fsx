@@ -1,4 +1,0 @@
-
-stdin.
-stdout.
-  
