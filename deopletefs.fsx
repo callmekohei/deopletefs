@@ -32,10 +32,10 @@ module ServiceSettings =
 
 
 type LanguageAgent(dirtyNotify) =
-    
+
     let fakeDateTimeRepresentingTimeLoaded proj = DateTime(abs (int64 (match proj with null -> 0 | _ -> proj.GetHashCode())) % 103231L)
 
-    let checker = 
+    let checker =
         let checker = FSharpChecker.Create()
         checker.BeforeBackgroundFileCheck.Add dirtyNotify
         checker
@@ -58,9 +58,9 @@ type LanguageAgent(dirtyNotify) =
 
 
     let mbox = MailboxProcessor.Start(fun mbox ->
-        async { 
-             while true do
-                
+        async {
+            while true do
+
                 let! (postData, partialName, checkOptions, reply: AsyncReplyChannel<_> ) = mbox.Receive()
 
                 let blockingTimeout_ms = if postData.Init = "real_init" then ServiceSettings.maximumTimeout else ServiceSettings.blockingTimeout
@@ -76,7 +76,7 @@ type LanguageAgent(dirtyNotify) =
                         None
 
                 reply.Reply results
-        } 
+        }
     )
 
     member x.GetCheckerOptions( postData ) =
@@ -84,12 +84,12 @@ type LanguageAgent(dirtyNotify) =
             checker.GetProjectOptionsFromScript( postData.FilePath, postData.Source, fakeDateTimeRepresentingTimeLoaded postData.FilePath)
             , timeout = ServiceSettings.maximumTimeout
         )
-     
+
     member x.GetDeclaration( postData, partialName ) =
          async {
             let opts = x.GetCheckerOptions( postData )
             return! mbox.PostAndAsyncReply(fun reply -> postData, partialName, fst(opts), reply)
-         }
+        }
 
 
 type PrinterAgent() =
@@ -180,8 +180,7 @@ module  FSharpIntellisence  =
                 let dt : JsonFormat = { word = x.Name; info = match x.DescriptionText with FSharpToolTipText xs -> List.map extractGroupTexts xs }
                 state + "\n" + JsonConvert.SerializeObject ( dt )
                 ) ""
-            |> fun s ->
-                s.Trim()
+            |> fun s -> s.Trim()
 
 
     let initfirst (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : unit =
@@ -210,14 +209,14 @@ module  FSharpIntellisence  =
 
         let tryUpdateDic (label:string) ( line:string) (col:int) =
             postData.Line <- line
-            let partialName = QuickParse.GetPartialLongNameEx(line, col) 
+            let partialName = QuickParse.GetPartialLongNameEx(line, col)
             dic.TryUpdate( label, jsonStrings agent postData partialName, dic.Item(label) ) |> ignore
 
         async{
             let tmpLine = postData.Line
             let tmpRow  = postData.Row
             postData.Row <- postData.Source.Split('\n').Length
-            
+
             [
                 // label          line                     col
                 // ---------------------------------------------
@@ -263,7 +262,7 @@ module  FSharpIntellisence  =
 
 
     let oneWordHints (dic:ConcurrentDictionary<string,string>)  (str:string) : string =
-        
+
         let s =
             if Regex.Match(str,"typeof<.|.*\(.|.*\[.|.*<.|.*:.").Success then
                 str.Substring( str.Length - 1 )
@@ -275,7 +274,7 @@ module  FSharpIntellisence  =
         dic.Item("OneWordHint")
         |> fun str -> str.Split('\n')
         |> Array.filter ( fun str -> str.ToLower().Contains( keyword ) )
-        |> fun ary -> 
+        |> fun ary ->
             if Array.isEmpty ary then
                 ""
             else
@@ -302,7 +301,7 @@ module  FSharpIntellisence  =
 
 
     let autocomplete (s:string) (agent:LanguageAgent) ( dic :ConcurrentDictionary<string,string> )  : string =
-        
+
         let postData = JsonConvert.DeserializeObject<PostData>(s)
 
         let tryUpdateDic (label:string) ( line:string) (col:int) =
@@ -334,14 +333,14 @@ module  FSharpIntellisence  =
             // System.Threading.Thread.Sleep(25)
 
             updateOpenKeyword ()
-            
+
             let s = postData.Line.Replace("("," ").Split(' ')
                     |> Array.filter ( fun s -> s <> "" )
                     |> Array.last
 
             /// . .. ... .... List.. List... List....
             if  s.StartsWith(".") || (Regex.Match(s,"^.*\.\.+?$")).Success then
-                msgForDeoplete "" 
+                msgForDeoplete ""
             else
                 if s.Contains(".") then
                     if  s.EndsWith(".") then
@@ -349,7 +348,7 @@ module  FSharpIntellisence  =
                     else
                         postData.Line <- previousDot( s )
                         dotHints agent dic postData
-                else    
+                else
                     oneWordOrAttributeHints dic postData
 
 

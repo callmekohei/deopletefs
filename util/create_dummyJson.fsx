@@ -9,17 +9,17 @@ open Newtonsoft.Json
 
 let checker = FSharpChecker.Create()
 
-let parseWithTypeInfo (file, input) = 
+let parseWithTypeInfo (file, input) =
     let checkOptions, _errors = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
     let parsingOptions, _errors = checker.GetParsingOptionsFromProjectOptions(checkOptions)
     let untypedRes = checker.ParseFile(file, input, parsingOptions) |> Async.RunSynchronously
-    
-    match checker.CheckFileInProject(untypedRes, file, 0, input, checkOptions) |> Async.RunSynchronously with 
+
+    match checker.CheckFileInProject(untypedRes, file, 0, input, checkOptions) |> Async.RunSynchronously with
     | FSharpCheckFileAnswer.Succeeded(res) -> untypedRes, res
     | res -> failwithf "Parsing did not finish... (%A)" res
 
 
-let getDeclsFromVirturalFile (keyword:string) = 
+let getDeclsFromVirturalFile (keyword:string) =
     let virtualFile = "./virtual.fsx"
     let row = 1
     // col sample : "List." col 4, "" col 0
@@ -27,7 +27,7 @@ let getDeclsFromVirturalFile (keyword:string) =
     let partialName = QuickParse.GetPartialLongNameEx(keyword,col)
     let untyped, parsed = parseWithTypeInfo (virtualFile, keyword)
 
-    parsed.GetDeclarationListInfo(Some untyped, row, keyword, partialName, (fun () -> [])) 
+    parsed.GetDeclarationListInfo(Some untyped, row, keyword, partialName, (fun () -> []))
     |> Async.RunSynchronously
 
 
@@ -56,7 +56,7 @@ let body =
         "stdin"
         "stdout"
     ]
-    |> List.map ( fun (s:string) -> 
+    |> List.map ( fun (s:string) ->
         let label = if String.IsNullOrEmpty s then "OneWordHint" else s
         let info  = getDeclsFromVirturalFile( if String.IsNullOrEmpty s then String.Empty else s + ".")
         let body  = info.Items
@@ -72,7 +72,7 @@ let head ="""
 namespace dummyJson
 
 module dummy =
-    let dummy = 
+    let dummy =
         Map.ofSeq [
 """
 
