@@ -189,18 +189,21 @@ module  FSharpIntellisence  =
         dic.GetOrAdd( "filePath"    , postData.FilePath )                       |> ignore
         dic.GetOrAdd( "openCount"   , string(openCount(postData.Source)) )      |> ignore
 
-        dic.GetOrAdd( "Array"       , dummyJson.dummy.dummy.Item("Array"))      |> ignore
-        dic.GetOrAdd( "List"        , dummyJson.dummy.dummy.Item("List"))       |> ignore
-        dic.GetOrAdd( "Map"         , dummyJson.dummy.dummy.Item("Map"))        |> ignore
-        dic.GetOrAdd( "Observable"  , dummyJson.dummy.dummy.Item("Observable")) |> ignore
-        dic.GetOrAdd( "OneWordHint" , dummyJson.dummy.dummy.Item("OneWord"))    |> ignore
-        dic.GetOrAdd( "Option"      , dummyJson.dummy.dummy.Item("Option"))     |> ignore
-        dic.GetOrAdd( "Seq"         , dummyJson.dummy.dummy.Item("Seq"))        |> ignore
-        dic.GetOrAdd( "Set"         , dummyJson.dummy.dummy.Item("Set"))        |> ignore
-        dic.GetOrAdd( "System"      , dummyJson.dummy.dummy.Item("System"))     |> ignore
-        dic.GetOrAdd( "stderr"      , dummyJson.dummy.dummy.Item("stderr"))     |> ignore
-        dic.GetOrAdd( "stdin"       , dummyJson.dummy.dummy.Item("stdin"))      |> ignore
-        dic.GetOrAdd( "stdout"      , dummyJson.dummy.dummy.Item("stdout"))     |> ignore
+        [
+            "Array"
+            "List"
+            "Map"
+            "Observable"
+            "OneWordHint"
+            "Option"
+            "Seq"
+            "Set"
+            "System"
+            "stderr"
+            "stdin"
+            "stdout"
+        ]
+        |> List.iter( fun label -> dic.GetOrAdd( label, dummyJson.dummy.dummy.Item(label)) |> ignore)
 
 
     let initSecond (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : Async<unit> =

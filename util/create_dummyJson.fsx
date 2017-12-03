@@ -42,14 +42,22 @@ let extractGroupTexts = function
 
 
 let body =
-    [   ""
+    [
+        ""
+        "Array"
+        "List"
+        "Map"
+        "Observable"
+        "Option"
+        "Seq"
+        "Set"
         "System"
-        "Array";"List";"Seq";"Set";"Map"
-        "Option";"Observable"
-        "stdout";"stdin";"stderr"
+        "stderr"
+        "stdin"
+        "stdout"
     ]
     |> List.map ( fun (s:string) -> 
-        let label = if String.IsNullOrEmpty s then "OneWord" else s
+        let label = if String.IsNullOrEmpty s then "OneWordHint" else s
         let info  = getDeclsFromVirturalFile( if String.IsNullOrEmpty s then String.Empty else s + ".")
         let body  = info.Items
                     |> Array.fold ( fun state x ->
