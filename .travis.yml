@@ -4,7 +4,7 @@ os: osx
 
 before_install:
     - brew update
-    - brew install paket
+    - brew outdated paket || brew upgrade paket
 
 mono:
     - latest
