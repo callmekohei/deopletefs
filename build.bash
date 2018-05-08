@@ -10,6 +10,9 @@
 FSX_PATH=./src/deopletefs.fsx
 Lib_PATH=./.paket/load/net471/main.group.fsx
 
+# see also
+# Getting Started with Paket > Manual setup
+# https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
 function download_paket_bootstrapper(){
     curl -s "https://api.github.com/repos/fsprojects/Paket/releases" \
         | jq '.[0].assets[].browser_download_url' \
@@ -29,7 +32,7 @@ install_lib() (
         nuget persimmon.script
     "
 
-    if [ $(which paket) = "" ] ; then
+    if [ -z $(which paket) ] ; then
         download_paket_bootstrapper
         mono ./.paket/paket.exe init
         echo "$foo" > ./paket.dependencies
