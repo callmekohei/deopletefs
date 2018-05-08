@@ -3,8 +3,7 @@ language: csharp
 os: osx
 
 before_install:
-    - brew update
-    - brew install paket && brew link --overwrite --dry-run mono
+  - brew update && brew bundle
 
 mono:
     - latest
