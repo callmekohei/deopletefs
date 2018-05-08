@@ -12,7 +12,18 @@ Lib_PATH=./.paket/load/net471/main.group.fsx
 
 
 install_lib() (
+
+    local foo="
+        source https://www.nuget.org/api/v2
+        generate_load_scripts: true
+        nuget fsharp.compiler.service
+        nuget newtonsoft.json
+        nuget persimmon.script
+    "
+
     if [ ! -e ./packages ] ; then
+        paket init
+        cat "$foo" > ./paket.dependencies
         paket install
     fi
 )
