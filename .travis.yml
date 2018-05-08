@@ -2,11 +2,14 @@ language: csharp
 
 os: osx
 
+before_install:
+    - brew update
+    - brew install paket
+
 mono:
     - latest
 
 script:
-    - brew install paket
     - bash ./build.bash
     - fsharpi ./src/test.fsx
 
