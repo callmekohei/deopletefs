@@ -23,7 +23,7 @@ install_lib() (
 
     if [ ! -e ./packages ] ; then
         paket init
-        cat "$foo" > ./paket.dependencies
+        echo "$foo" > ./paket.dependencies
         paket install
     fi
 )
