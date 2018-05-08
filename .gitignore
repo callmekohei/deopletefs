@@ -1,7 +1,6 @@
 !.gitignore
 .paket/
 !.travis.yml
-!Brewfile
 !LICENCE
 !README.md
 bin/

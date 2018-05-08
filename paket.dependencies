@@ -1,5 +1,7 @@
-source https://www.nuget.org/api/v2
-generate_load_scripts: true
-nuget fsharp.compiler.service
-nuget newtonsoft.json
-nuget persimmon.script
+
+        source https://www.nuget.org/api/v2
+        generate_load_scripts: true
+        nuget fsharp.compiler.service
+        nuget newtonsoft.json
+        nuget persimmon.script
+    
