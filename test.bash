@@ -1,2 +1,0 @@
-fsharpi ./test/test.fsx
-

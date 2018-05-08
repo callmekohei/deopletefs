@@ -1,29 +1,21 @@
 !.gitignore
-!.paket/
-!easyCompile.bash
+.paket/
+!.travis.yml
+!LICENCE
+!README.md
+bin/
+!build.bash
+!deploy_key.enc
+packages/
+paket-files/
 !paket.dependencies
 !paket.lock
-!deopletefs.fsx
-!test/
-!README.md
-!dummyJson.fsx
-!.travis.yml
-!deploy_key.enc
-!util/*
-!test/Persimmon.Console.exe.config
-!test/test.fsx
-!test/dummy.fsx
+!src/create_dummyJson.fsx
+!src/deopletefs.fsx
+!src/test.fsx
 
-test/test.dll
-test/tools/*
-.paket/paket.exe
-bin*/
-tools/
-packages/
-deopletefs_deoplete-fsharp_temporary_file.fsx
 deploy_key
 deploy_key.pub
-util/dummyJson.fsx
 
 
 ### https://raw.github.com/github/gitignore/0f88fa75def7ed7d96935b8630793e51953df9b0/Global/macos.gitignore

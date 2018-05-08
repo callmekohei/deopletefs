@@ -7,7 +7,7 @@ mono:
 
 script:
     - bash build.bash
-    - bash test.bash
+    - fsharpi ./src/test.fsx
 
 after_success:
   # prepare
@@ -25,9 +25,7 @@ after_success:
   - cd ..
   - git clone git@github.com:callmekohei/deoplete-fsharp-bin.git
   - rm -rf ./deoplete-fsharp-bin/bin_deopletefs
-  - rm -rf ./deoplete-fsharp-bin/tools
-  - cp -rf ./deopletefs/bin_deopletefs ./deoplete-fsharp-bin/
-  - cp -rf ./deopletefs/tools          ./deoplete-fsharp-bin/
+  - cp -rf ./deopletefs/bin ./deoplete-fsharp-bin/
   #
   - cd ./deoplete-fsharp-bin
   - git add --all

@@ -1,79 +1,66 @@
 # ===========================================================================
-#  FILE    : easyCompile.bash
+#  FILE    : build.bash
 #  AUTHOR  : callmekohei <callmekohei at gmail.com>
 #  License : MIT license
 # ===========================================================================
 
+#!/bin/bash
 
-# Please fit your path if you need.
-mono=''
-fsc=''
-
-mono .paket/paket.bootstrapper.exe
-mono .paket/paket.exe install
-
-SCRIPT_PATH='./deopletefs.fsx'
-SCRIPT_DIR=$(cd $(dirname $0);pwd)
-
-# Create dummyJson.fsx
-fsharpi ./util/create_dummyJson.fsx > ./util/dummyJson.fsx
+# fit your file path
+FSX_PATH=./src/deopletefs.fsx
+Lib_PATH=./.paket/load/net471/main.group.fsx
 
 
-# Create EXE file
-declare -a arr=(
-   '--nologo'
-   '--simpleresolution'
-   # '--define:DEBUG'
-    $SCRIPT_PATH
+install_lib() (
+    if [ ! -e ./packages ] ; then
+        paket install
+    fi
 )
 
-if [ "$mono" = "" ] || [ "$fsc" = "" ] ; then
+create_exe_file() (
+    declare -a local arr=(
+        $FSX_PATH
+        --nologo
+        --simpleresolution
+        --out:./bin/$(basename $FSX_PATH .fsx).exe
+    )
     fsharpc ${arr[@]}
-else
-    $mono $fsc --exename:$(basename "$0") ${arr[@]}
-fi
+)
 
-
-# Create bin folder
-if [ -e ./bin_deopletefs ] ; then
-    rm -rf ./bin_deopletefs
-fi
-
-mkdir ./bin_deopletefs
-
-
-# EXE file -> ./bin folder (move)
-EXE_PATH=${SCRIPT_PATH%.fsx}.exe
-mv $EXE_PATH ./bin_deopletefs
-
-
-# Get path of DLL from FSharp script
-cat $SCRIPT_PATH \
-    | grep --color=never -e '^#r' \
-    | sed  -e 's/^.*@"//g' \
-           -e 's/"$//g' \
-           -e 's%^\.%'$SCRIPT_DIR'%g' \
-    > /tmp/std.out.$$ 2>/tmp/std.err.$$
-
-std_out=`cat /tmp/std.out.$$`
-std_err=`cat /tmp/std.err.$$`
-rm -f /tmp/std.out.$$
-rm -f /tmp/std.err.$$
-
-
-# DLL files -> ./bin folder (copy)
-if [ -n "$std_out" ] ; then
-
-    cp $SCRIPT_DIR'/packages/FSharp.Core/lib/net45/FSharp.Core.dll' ./bin_deopletefs/
-
-    Arr_DLL_PATH=($(echo $std_out))
-    len=$(( ${#Arr_DLL_PATH[@]} - 1 ))
-
-    for i in $(seq 0 $len) ; do
-        cp ${Arr_DLL_PATH[$i]} ./bin_deopletefs/
+arrange_text() {
+    local line
+    while read -r line
+    do
+        echo "$line" \
+        | sed -e 's/#r //g' \
+              -e 's/"//g'   \
+        | grep --color=never -e "^\." \
+        | sed -e 's|^.*packages|\./packages|g'
     done
+}
 
+copy_dll_to_bin_folder() {
+    local line
+    while read -r line
+    do
+        cp $line ./bin/
+    done
+}
+
+
+if [ -e ./bin ] ; then
+    echo 'do nothing!'
+else
+    mkdir ./bin
+    install_lib
+    fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
+    create_exe_file
+    cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
+    # add log.txt
+    touch ./bin_deopletefs/log.txt
 fi
 
-# add log.txt
-touch ./bin_deopletefs/log.txt
+
+
+
+
