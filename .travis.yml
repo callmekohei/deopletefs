@@ -7,7 +7,7 @@ mono:
 
 script:
     - brew install paket
-    - bash build.bash
+    - bash ./build.bash
     - fsharpi ./src/test.fsx
 
 after_success:
