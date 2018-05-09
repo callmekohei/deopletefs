@@ -41,7 +41,7 @@ install_lib() (
         # echo "$foo" > ./paket.dependencies
         # mono ./.paket/paket.exe install
 
-        # paket init
+        paket init
         # echo "$foo" > ./paket.dependencies
         # paket install
     else
