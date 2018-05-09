@@ -85,13 +85,13 @@ copy_dll_to_bin_folder() {
 if [ -e ./bin ] ; then
     echo 'do nothing!'
 else
-    # mkdir ./bin
+    mkdir ./bin
     install_lib
-    # fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
-    # create_exe_file
-    # cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
-    # # add log.txt
-    # touch ./bin/log.txt
+    fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
+    create_exe_file
+    cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
+    # add log.txt
+    touch ./bin/log.txt
 fi
 
 
