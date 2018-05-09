@@ -11,6 +11,7 @@ paket-files/
 !paket.dependencies
 !paket.lock
 !src/create_dummyJson.fsx
+src/dummyJson.fsx
 !src/deopletefs.fsx
 !src/test.fsx
 
