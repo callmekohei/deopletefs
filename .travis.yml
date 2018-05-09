@@ -1,13 +1,12 @@
 language: csharp
 
 os: osx
+osx_image: latest
+mono: latest
 
 before_install:
     - brew update
     - brew install jq
-
-mono:
-    - latest
 
 script:
     - bash ./build.bash
