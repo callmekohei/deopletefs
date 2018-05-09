@@ -6,7 +6,7 @@ mono: latest
 
 before_install:
     - brew update
-    - brew install jq
+    - brew install paket
 
 script:
     - bash ./build.bash
