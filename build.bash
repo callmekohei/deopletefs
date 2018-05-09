@@ -10,6 +10,7 @@
 FSX_PATH=./src/deopletefs.fsx
 Lib_PATH=./.paket/load/net471/main.group.fsx
 
+
 # see also
 # Getting Started with Paket > Manual setup
 # https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
@@ -23,6 +24,7 @@ function download_paket_bootstrapper(){
     mv .paket/paket.bootstrapper.exe .paket/paket.exe
 }
 
+
 install_lib() (
 
     local foo="
@@ -33,17 +35,11 @@ install_lib() (
         nuget persimmon.script
     "
 
-
-
     if [ -z $(which paket) ] ; then
-        # download_paket_bootstrapper
-        # mono ./.paket/paket.exe init
-        # echo "$foo" > ./paket.dependencies
-        # mono ./.paket/paket.exe install
-
-        paket init
-        # echo "$foo" > ./paket.dependencies
-        # paket install
+        download_paket_bootstrapper
+        mono ./.paket/paket.exe init
+        echo "$foo" > ./paket.dependencies
+        mono ./.paket/paket.exe install
     else
         if [ ! -f ./packages/ ] ; then
             paket init
@@ -52,6 +48,7 @@ install_lib() (
         fi
     fi
 )
+
 
 create_exe_file() (
     declare -a local arr=(
@@ -62,6 +59,7 @@ create_exe_file() (
     )
     fsharpc ${arr[@]}
 )
+
 
 arrange_text() {
     local line
@@ -74,6 +72,7 @@ arrange_text() {
         | sed -e 's|^.*packages|\./packages|g'
     done
 }
+
 
 copy_dll_to_bin_folder() {
     local line
@@ -95,8 +94,3 @@ else
     # add log.txt
     touch ./bin/log.txt
 fi
-
-
-
-
-
