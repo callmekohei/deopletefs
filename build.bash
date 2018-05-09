@@ -15,12 +15,12 @@ Lib_PATH=./.paket/load/net471/main.group.fsx
 # https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
 function download_paket_bootstrapper(){
     curl -i "https://api.github.com/repos/fsprojects/Paket/releases" \
-        # | jq '.[]' \
-        # | jq '.[0].assets[].browser_download_url' \
-        # | grep 'paket.bootstrapper.exe' \
-        # | xargs wget -P .paket
+        | jq '.[]' \
+        | jq '.[0].assets[].browser_download_url' \
+        | grep 'paket.bootstrapper.exe' \
+        | xargs wget -P .paket
 
-    # mv .paket/paket.bootstrapper.exe .paket/paket.exe
+    mv .paket/paket.bootstrapper.exe .paket/paket.exe
 }
 
 install_lib() (
@@ -40,8 +40,8 @@ install_lib() (
         # mono ./.paket/paket.exe install
 
         paket init
-        # echo "$foo" > ./paket.dependencies
-        # paket install
+        echo "$foo" > ./paket.dependencies
+        paket install
     else
         if [ ! -f ./paket.dependencies ] ; then
             paket init
