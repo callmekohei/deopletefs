@@ -33,17 +33,19 @@ install_lib() (
         nuget persimmon.script
     "
 
+
+
     if [ -z $(which paket) ] ; then
         # download_paket_bootstrapper
         # mono ./.paket/paket.exe init
         # echo "$foo" > ./paket.dependencies
         # mono ./.paket/paket.exe install
 
-        paket init
-        echo "$foo" > ./paket.dependencies
-        paket install
+        # paket init
+        # echo "$foo" > ./paket.dependencies
+        # paket install
     else
-        if [ ! -f ./paket.dependencies ] ; then
+        if [ ! -f ./packages/ ] ; then
             paket init
             echo "$foo" > ./paket.dependencies
             paket install
