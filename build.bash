@@ -15,11 +15,12 @@ Lib_PATH=./.paket/load/net471/main.group.fsx
 # https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
 function download_paket_bootstrapper(){
     curl -s "https://api.github.com/repos/fsprojects/Paket/releases" \
-        | jq '.[0].assets[].browser_download_url' \
-        | grep 'paket.bootstrapper.exe' \
-        | xargs wget -P .paket
+        | jq '.[0]' \
+        # | jq '.[0].assets[].browser_download_url' \
+        # | grep 'paket.bootstrapper.exe' \
+        # | xargs wget -P .paket
 
-    mv .paket/paket.bootstrapper.exe .paket/paket.exe
+    # mv .paket/paket.bootstrapper.exe .paket/paket.exe
 }
 
 install_lib() (
@@ -34,9 +35,9 @@ install_lib() (
 
     if [ -z $(which paket) ] ; then
         download_paket_bootstrapper
-        mono ./.paket/paket.exe init
-        echo "$foo" > ./paket.dependencies
-        mono ./.paket/paket.exe install
+        # mono ./.paket/paket.exe init
+        # echo "$foo" > ./paket.dependencies
+        # mono ./.paket/paket.exe install
     else
         if [ ! -f ./paket.dependencies ] ; then
             paket init
@@ -80,13 +81,13 @@ copy_dll_to_bin_folder() {
 if [ -e ./bin ] ; then
     echo 'do nothing!'
 else
-    mkdir ./bin
+    # mkdir ./bin
     install_lib
-    fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
-    create_exe_file
-    cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
-    # add log.txt
-    touch ./bin/log.txt
+    # fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
+    # create_exe_file
+    # cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
+    # # add log.txt
+    # touch ./bin/log.txt
 fi
 
 
