@@ -6,7 +6,7 @@ mono: latest
 
 before_install:
     - brew update
-    - brew install paket
+    - brew install paket --without-mono
 
 script:
     - bash ./build.bash

@@ -40,8 +40,8 @@ install_lib() (
         # mono ./.paket/paket.exe install
 
         paket init
-        echo "$foo" > ./paket.dependencies
-        paket install
+        # echo "$foo" > ./paket.dependencies
+        # paket install
     else
         if [ ! -f ./paket.dependencies ] ; then
             paket init
