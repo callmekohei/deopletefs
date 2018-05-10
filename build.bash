@@ -15,6 +15,13 @@ Lib_PATH=./.paket/load/net471/main.group.fsx
 # Getting Started with Paket > Manual setup
 # https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
 function download_paket_bootstrapper(){
+
+    if [ ! $(type -t jq) ] ; then
+        echo 'Please install jq'
+        return -1
+        exit
+    fi
+
     curl -i "https://api.github.com/repos/fsprojects/Paket/releases" \
         | jq '.[]' \
         | jq '.[0].assets[].browser_download_url' \
@@ -34,12 +41,6 @@ install_lib() (
         nuget newtonsoft.json
         nuget persimmon.script
     "
-
-    if [ ! $(type -t jq) ] ; then
-        echo 'Please install jq'
-        return -1
-        exit
-    fi
 
     if [ ! $(type -t paket) ] ; then
         download_paket_bootstrapper
