@@ -35,7 +35,13 @@ install_lib() (
         nuget persimmon.script
     "
 
-    if [ -z $(which paket) ] ; then
+    if [ ! $(type -t jq) ] ; then
+        echo 'Please install jq'
+        return -1
+        exit
+    fi
+
+    if [ ! $(type -t paket) ] ; then
         download_paket_bootstrapper
         mono ./.paket/paket.exe init
         echo "$foo" > ./paket.dependencies
@@ -88,9 +94,11 @@ if [ -e ./bin ] ; then
 else
     mkdir ./bin
     install_lib
-    fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
-    create_exe_file
-    cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
-    # add log.txt
-    touch ./bin/log.txt
+    if [ $? = 0 ] ; then
+        fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
+        create_exe_file
+        cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
+        # add log.txt
+        touch ./bin/log.txt
+    fi
 fi
