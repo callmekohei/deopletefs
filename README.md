@@ -9,7 +9,7 @@
 `deopletefs` provides only [Getting auto-complete lists](https://fsharp.github.io/FSharp.Compiler.Service/editor.html#Getting-auto-complete-lists)
 
 
-## Installing
+## Install
 
 ```
 $ git clone deapth -1 https://github.com/callmekohei/deopletefs
@@ -55,17 +55,26 @@ initialize
 { "Row" : -9999 ,"Col": 1, "Line": "", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"true"}
 
 // return as base64String
-// meanig: {"word":"finish initialize!","info":[[""]]}
 ---> eyJ3b3JkIjoiZmluaXNoIGluaXRpYWxpemUhIiwiaW5mbyI6W1siIl1dfQ==
+
+// decode64
+{"word":"finish initialize!","info":[[""]]}
 ```
 
-complete
+complete list
 ```text
 // input as Json
 { "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}
 
 // return as base64String
 ---> eyJ3b3JkIjoiYWxsUGFpcnMiLCJpbmZvIjpb....
+
+// decode64
+{"word":"allPairs","info":[["val allPairs : list1:'T1 list -> list2:'T2 list -> ('T1 * 'T2) list"]]}
+{"word":"append","info":[["val append : list1:'T list -> list2:'T list -> 'T list"]]}
+{"word":"average","info":[["val average : list:'T list -> 'T (requires member ( + ) and member DivideByInt and member get_Zero)"]]}
+{"word":"averageBy","info":[["val averageBy : projection:('T -> 'U) -> list:'T list -> 'U (requires member ( + ) and member DivideByInt and member get_Zero)"]]}
+...
 ```
 
 
