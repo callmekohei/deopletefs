@@ -63,6 +63,11 @@ create_exe_file() (
         --nologo
         --simpleresolution
         --out:./bin/$(basename $FSX_PATH .fsx).exe
+        ### ===== enable print debug =====
+        # --define:DEBUG
+        ### ===== crete debug symbol file (.mdb) =====
+        # --debug+
+        # --optimize-
     )
     fsharpc ${arr[@]}
 )
@@ -96,10 +101,9 @@ else
     mkdir ./bin
     install_lib
     if [ $? = 0 ] ; then
-        fsharpi ./src/create_dummyJson.fsx > ./src/dummyJson.fsx
         create_exe_file
         cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
-        # add log.txt
+        ### add log.txt
         touch ./bin/log.txt
     fi
 fi
