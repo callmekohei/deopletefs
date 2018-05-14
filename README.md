@@ -73,7 +73,3 @@ quit
 ```
 quit
 ```
-
-## License
-
-MIT License
