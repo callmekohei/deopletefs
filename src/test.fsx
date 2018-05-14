@@ -80,6 +80,11 @@ open System.Reflection
 open Persimmon
 open UseTestNameByReflection
 
+let encode64 (s:string) =
+    System.Convert.ToBase64String( System.Text.Encoding.UTF8.GetBytes( s ) )
+
+let decode64 (base64String:string) =
+    System.Text.Encoding.UTF8.GetString( System.Convert.FromBase64String( base64String ) )
 
 
 let ``test of angleBracket`` = test {
@@ -126,33 +131,46 @@ let ``test of openCount`` = test {
 }
 
 let ``test of msgForDeoplete`` = test {
-    do! assertEquals """{"word":"abc","info":[[""]]}""" ( msgForDeoplete "abc" )
+    do! assertEquals """{"word":"abc","info":[[""]]}""" ( decode64( msgForDeoplete "abc" ) )
 }
 
-let ``test of autocomplete`` = test {
+let ``initialize`` = test {
+    let json           = """{ "Row" : -9999 ,"Col": 1, "Line": "", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"true"}"""
+    let resultString   = decode64 ( autocomplete json agent dic )
+    let expectedString = """{"word":"finish initialize!","info":[[""]]}"""
+    do! assertEquals expectedString resultString
+}
 
-    let json = """{ "Row" : -9999 ,"Col": -9999, "Line": "", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"dummy_init"}"""
-    do! assertEquals """{"word":"finish dummy initialize!","info":[[""]]}""" ( autocomplete json agent dic )
+let ``List - allPairs`` = test {
+    let json           = """{ "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
+    let ListFuncs      = ( decode64( autocomplete json agent dic ) ).Split('\n') |> fun ary -> ary.[0]
+    let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(ListFuncs).word
+    let expectedString = "allPairs"
+    do! assertEquals expectedString resultString
+}
 
-    let json2 = """{ "Row" : 1 ,"Col": 1, "Line": "", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"real_init"}"""
-    do! assertEquals """{"word":"finish real initialize!","info":[[""]]}""" ( autocomplete json2 agent dic )
+let ``stdin - Close`` = test {
+    let json           = """{ "Row" : 1 ,"Col": 6, "Line": "stdin.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
+    let stdinMethods   = ( decode64( autocomplete json agent dic ) ).Split('\n') |> fun ary -> ary.[0]
+    let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(stdinMethods).word
+    let expectedString = "Close"
+    do! assertEquals expectedString resultString
+}
 
-    let json3 = """{ "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    let ListFuncs = ( autocomplete json3 agent dic ).Split('\n') |> fun ary -> ary.[0]
-    do! assertEquals "allPairs" ( JsonConvert.DeserializeObject<deopletefs.JsonFormat>(ListFuncs).word )
+let ``oneWordHints - abs`` = test {
+    let json           = """{ "Row" : 1 ,"Col": 1, "Line": "a", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
+    let filteredByA    = ( decode64( autocomplete json agent dic ) ).Split('\n') |> fun ary -> ary.[0]
+    let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(filteredByA).word
+    let expectedString = "abs"
+    do! assertEquals expectedString resultString
+}
 
-    let json4 = """{ "Row" : 1 ,"Col": 6, "Line": "stdin.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    let stdinMethods = ( autocomplete json4 agent dic ).Split('\n') |> fun ary -> ary.[0]
-    do! assertEquals "Close" ( JsonConvert.DeserializeObject<deopletefs.JsonFormat>(stdinMethods).word )
-
-    let json5 = """{ "Row" : 1 ,"Col": 2, "Line": "[<", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    let attributeA = ( autocomplete json5 agent dic ).Split('\n') |> fun ary -> ary.[0]
-    do! assertEquals "AbstractClassAttribute" ( JsonConvert.DeserializeObject<deopletefs.JsonFormat>(attributeA).word )
-
-    let json6 = """{ "Row" : 1 ,"Col": 1, "Line": "a", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    let filteredByA = ( autocomplete json6 agent dic ).Split('\n') |> fun ary -> ary.[0]
-    do! assertEquals "abs" ( JsonConvert.DeserializeObject<deopletefs.JsonFormat>(filteredByA).word )
-
+let ``attributeHints - AbstractClassAttribute`` = test {
+    let json           = """{ "Row" : 1 ,"Col": 2, "Line": "[<", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
+    let attributeA     = ( decode64( autocomplete json agent dic ) ).Split('\n') |> fun ary -> ary.[0]
+    let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(attributeA).word
+    let expectedString = "AbstractClassAttribute"
+    do! assertEquals expectedString resultString
 }
 
 /// print out test report.

@@ -17,9 +17,6 @@ open System.Collections.Concurrent
 open System.Diagnostics
 open System.Text.RegularExpressions
 
-#load @"./dummyJson.fsx"
-open dummyJson.dummy
-
 
 type PostData   = { mutable Row:int; Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
 type JsonFormat = { word : string; info: string list list  }
@@ -34,6 +31,7 @@ module ServiceSettings =
 type LanguageAgent(dirtyNotify) =
 
     let fakeDateTimeRepresentingTimeLoaded proj = DateTime(abs (int64 (match proj with null -> 0 | _ -> proj.GetHashCode())) % 103231L)
+
 
     let checker =
         let checker = FSharpChecker.Create()
@@ -63,7 +61,7 @@ type LanguageAgent(dirtyNotify) =
 
                 let! (postData, partialName, checkOptions, reply: AsyncReplyChannel<_> ) = mbox.Receive()
 
-                let blockingTimeout_ms = if postData.Init = "real_init" then ServiceSettings.maximumTimeout else ServiceSettings.blockingTimeout
+                let blockingTimeout_ms = if postData.Init = "true" then ServiceSettings.maximumTimeout else ServiceSettings.blockingTimeout
 
                 let results =
                     try
@@ -110,6 +108,12 @@ type PrinterAgent() =
 
 
 module Util =
+
+    let encode64 (s:string) =
+        System.Convert.ToBase64String( System.Text.Encoding.UTF8.GetBytes( s ) )
+
+    let decode64 (base64String:string) =
+        System.Text.Encoding.UTF8.GetString( System.Convert.FromBase64String( base64String ) )
 
 
     let angleBracket ( s:string ) :string =
@@ -163,6 +167,7 @@ module Util =
     /// printout message to deoplete
     let msgForDeoplete (wd:string) : string =
         JsonConvert.SerializeObject( { word = wd ; info=[[""]] } )
+        |> fun s -> encode64 s
 
 
 module  FSharpIntellisence  =
@@ -181,63 +186,44 @@ module  FSharpIntellisence  =
                 state + "\n" + JsonConvert.SerializeObject ( dt )
                 ) ""
             |> fun s -> s.Trim()
+            |> fun s -> Util.encode64 s
 
 
-    let initfirst (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : unit =
+    let init (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : unit =
 
         dic.GetOrAdd( "filePath"    , postData.FilePath )                       |> ignore
         dic.GetOrAdd( "openCount"   , string(openCount(postData.Source)) )      |> ignore
 
-        [
-            "Array"
-            "List"
-            "Map"
-            "Observable"
-            "OneWordHint"
-            "Option"
-            "Seq"
-            "Set"
-            "System"
-            "stderr"
-            "stdin"
-            "stdout"
-        ]
-        |> List.iter( fun label -> dic.GetOrAdd( label, dummy.Item(label)) |> ignore)
-
-
-    let initSecond (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData) : Async<unit> =
-
-        let tryUpdateDic (label:string) ( line:string) (col:int) =
+        let getOrAddDic (label:string) ( line:string) (col:int) =
             postData.Line <- line
             let partialName = QuickParse.GetPartialLongNameEx(line, col)
-            dic.TryUpdate( label, jsonStrings agent postData partialName, dic.Item(label) ) |> ignore
+            dic.GetOrAdd( label, jsonStrings agent postData partialName ) |> ignore
 
-        async{
-            let tmpLine = postData.Line
-            let tmpRow  = postData.Row
-            postData.Row <- postData.Source.Split('\n').Length
 
-            [
-                // label          line                     col
-                // ---------------------------------------------
-                ( "Array"       , "Array."                , 5  )
-                ( "List"        , "List."                 , 4  )
-                ( "Map"         , "Map."                  , 3  )
-                ( "Observable"  , "Observable."           , 10 )
-                ( "OneWordHint" , ""                      , 0  )
-                ( "Option"      , "Option."               , 6  )
-                ( "Seq"         , "Seq."                  , 3  )
-                ( "Set"         , "Set."                  , 3  )
-                ( "System"      , "System."               , 6  )
-                ( "stderr"      , "System.Console.Error." , 20 )
-                ( "stdin"       , "System.Console.In."    , 17 )
-                ( "stdout"      , "System.Console.Out."   , 18 )
-            ]
-            |> List.iter( fun (label,line,col) -> tryUpdateDic label line col )
+        let tmpLine = postData.Line
+        let tmpRow  = postData.Row
+        postData.Row <- postData.Source.Split('\n').Length
 
-            postData.Row  <- tmpRow
-            postData.Line <- tmpLine
-        }
+        [
+            // label          line                     col
+            // ---------------------------------------------
+            ( "Array"       , "Array."                , 5  )
+            ( "List"        , "List."                 , 4  )
+            ( "Map"         , "Map."                  , 3  )
+            ( "Observable"  , "Observable."           , 10 )
+            ( "OneWordHint" , ""                      , 0  )
+            ( "Option"      , "Option."               , 6  )
+            ( "Seq"         , "Seq."                  , 3  )
+            ( "Set"         , "Set."                  , 3  )
+            ( "System"      , "System."               , 6  )
+            ( "stderr"      , "System.Console.Error." , 20 )
+            ( "stdin"       , "System.Console.In."    , 17 )
+            ( "stdout"      , "System.Console.Out."   , 18 )
+        ]
+        |> List.iter( fun (label,line,col) -> getOrAddDic label line col )
+
+        postData.Row  <- tmpRow
+        postData.Line <- tmpLine
 
 
     let dotHints (agent:LanguageAgent) (dic:ConcurrentDictionary<string,string>) (postData:PostData)  : string =
@@ -269,25 +255,28 @@ module  FSharpIntellisence  =
             else
                 str.Substring(0)
 
-
         let keyword = """{"word":""" + "\"" + s.ToLower()
         dic.Item("OneWordHint")
+        |> fun s -> Util.decode64 s
         |> fun str -> str.Split('\n')
         |> Array.filter ( fun str -> str.ToLower().Contains( keyword ) )
         |> fun ary ->
             if Array.isEmpty ary then
                 ""
+                |> fun s -> Util.encode64 s
             else
                 ary |> Array.reduce ( fun a b -> a + "\n" + b )
                 |> fun s -> s.TrimEnd()
-
+                |> fun s -> Util.encode64 s
 
     let attributeHints (dic:ConcurrentDictionary<string,string>) : string =
         dic.Item( "OneWordHint" )
+        |> fun s -> Util.decode64 s
         |> fun str -> str.Split('\n')
         |> Array.filter ( fun str -> str.Contains("Attribute") )
         |> Array.reduce ( fun a b -> a + "\n" + b )
         |> fun s -> s.TrimEnd()
+        |> fun s -> Util.encode64 s
 
 
     let oneWordOrAttributeHints (dic:ConcurrentDictionary<string,string>) (postData:PostData) : string =
@@ -344,24 +333,27 @@ module  FSharpIntellisence  =
             else
                 if s.Contains(".") then
                     if  s.EndsWith(".") then
-                        dotHints agent dic postData
+                        let s = dotHints agent dic postData
+                        Debug.Print("==============================")
+                        Debug.Print(s)
+                        s
                     else
                         postData.Line <- previousDot( s )
-                        dotHints agent dic postData
+                        let s = dotHints agent dic postData
+                        Debug.Print("==============================")
+                        Debug.Print(s)
+                        s
                 else
-                    oneWordOrAttributeHints dic postData
+                    let s = oneWordOrAttributeHints dic postData
+                    Debug.Print("==============================")
+                    Debug.Print(s)
+                    s
 
 
-        if postData.Init = "dummy_init" then
-            Debug.WriteLine("dummy_init initialize")
-            initfirst agent dic postData
-            Debug.WriteLine("finish dummy_init initialize")
-            msgForDeoplete "finish dummy initialize!"
-        elif postData.Init = "real_init" then
-            Debug.WriteLine("real_init initialize")
-            initSecond agent dic postData |> Async.Start
-            Debug.WriteLine("finish real_init initialize")
-            msgForDeoplete "finish real initialize!"
+        if postData.Init = "true" then
+            Debug.WriteLine("===== initialize depletefs =====")
+            init agent dic postData
+            msgForDeoplete "finish initialize!"
         else
             main ()
 
@@ -394,3 +386,4 @@ module InteractiveConsole =
     let entry arg =
         main "init"
         0
+
