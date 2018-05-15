@@ -8,18 +8,16 @@
 `deopletefs` is a command-line interface to the FSharp.Compiler.Service.  
 `deopletefs` provides only [Getting auto-complete lists](https://fsharp.github.io/FSharp.Compiler.Service/editor.html#Getting-auto-complete-lists)
 
+## Requires
+bash  
+[mono](https://github.com/mono/mono)  
+[fsharp](https://github.com/fsharp/fsharp)
 
-## Install
+## Install, build and test
 
 ```
 $ git clone deapth -1 https://github.com/callmekohei/deopletefs
-```
-
-## Build and Test
-
-Requires bash, mono and FSharp installed
-
-```
+$ cd ./deopletefs/
 $ bash build.bash
 $ fsharpi ./src/test.fsx
 ```
