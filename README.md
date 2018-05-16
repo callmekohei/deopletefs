@@ -9,7 +9,6 @@
 `deopletefs` provides only [Getting auto-complete lists](https://fsharp.github.io/FSharp.Compiler.Service/editor.html#Getting-auto-complete-lists)
 
 ## Requires
-bash  
 [mono](https://github.com/mono/mono)  
 [fsharp](https://github.com/fsharp/fsharp)
 
