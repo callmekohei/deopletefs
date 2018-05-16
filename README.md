@@ -24,7 +24,7 @@ $ fsharpi ./src/test.fsx
 ## Communication protocol
 
 input  : Json  
-output : base64String
+output : base64String ( innner data is Json )
 
 Example of input
 ```text
