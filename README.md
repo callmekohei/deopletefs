@@ -26,8 +26,8 @@ $ fsharpi ./src/test.fsx
 input  : Json  
 output : base64String
 
+Example of input
 ```text
-// Example of Json
 {
     "Row"      : 1
   , "Col"      : 5
@@ -35,6 +35,22 @@ output : base64String
   , "FilePath" : "./foo.fsx"
   , "Source"   : "List."
   , "Init"     : "false"
+}
+```
+
+Example of output
+```text
+// return as base64String
+---> eyJ3b3JkIjoiYWxsUGFpcnMiLCJpbmZvIjpb....
+
+// decode64
+{
+  "word": "allPairs",
+  "info": [
+    [
+      "val allPairs : list1:'T1 list -> list2:'T2 list -> ('T1 * 'T2) list"
+    ]
+  ]
 }
 ```
 
