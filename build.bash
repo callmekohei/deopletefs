@@ -16,7 +16,7 @@ Lib_PATH=./.paket/load/net471/main.group.fsx
 # https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
 function download_paket_bootstrapper(){
 
-    if ! type jq >/dev/null 2&>1 ; then
+    if ! type jq >/dev/null 2>&1 ; then
         echo 'Please install jq'
         return -1
         exit
@@ -26,7 +26,7 @@ function download_paket_bootstrapper(){
         | jq '.[]' \
         | jq '.[0].assets[].browser_download_url' \
         | grep 'paket.bootstrapper.exe' \
-        | xargs wget -P .paket
+        | xargs wget -P ./.paket/
 
     mv .paket/paket.bootstrapper.exe .paket/paket.exe
 }
@@ -35,8 +35,8 @@ function download_paket_bootstrapper(){
 install_lib() (
 
     local foo="
-        source https://www.nuget.org/api/v2
         generate_load_scripts: true
+        source https://www.nuget.org/api/v2
         nuget fsharp.compiler.service
         nuget newtonsoft.json
         nuget persimmon.script
@@ -45,12 +45,12 @@ install_lib() (
     if ! type paket >/dev/null 2&>1 ; then
         download_paket_bootstrapper
         mono ./.paket/paket.exe init
-        echo "$foo" > ./paket.dependencies
+        echo "${foo}" > ./paket.dependencies
         mono ./.paket/paket.exe install
     else
         if [ ! -f ./packages/ ] ; then
             paket init
-            echo "$foo" > ./paket.dependencies
+            echo "${foo}" > ./paket.dependencies
             paket install
         fi
     fi
@@ -59,17 +59,17 @@ install_lib() (
 
 create_exe_file() (
     declare -a local arr=(
-        $FSX_PATH
+        "${FSX_PATH}"
         --nologo
         --simpleresolution
-        --out:./bin/$(basename $FSX_PATH .fsx).exe
+        --out:./bin/$(basename "${FSX_PATH}" .fsx).exe
         ### ===== enable print debug =====
         # --define:DEBUG
         ### ===== crete debug symbol file (.mdb) =====
         # --debug+
         # --optimize-
     )
-    fsharpc ${arr[@]}
+    fsharpc "${arr[@]}"
 )
 
 
@@ -77,7 +77,7 @@ arrange_text() {
     local line
     while read -r line
     do
-        echo "$line" \
+        echo "${line}" \
         | sed -e 's/#r //g' \
               -e 's/"//g'   \
         | grep --color=never -e "^\." \
@@ -90,19 +90,19 @@ copy_dll_to_bin_folder() {
     local line
     while read -r line
     do
-        cp $line ./bin/
+        cp ${line} ./bin/
     done
 }
 
 
-if [ -e ./bin ] ; then
+if [ -e ./bin/ ] ; then
     echo 'do nothing!'
 else
-    mkdir ./bin
+    mkdir ./bin/
     install_lib
-    if [ $? = 0 ] ; then
+    if [ "$?" = 0 ] ; then
         create_exe_file
-        cat $Lib_PATH | arrange_text | copy_dll_to_bin_folder
+        cat "${Lib_PATH}" | arrange_text | copy_dll_to_bin_folder
         ### add log.txt
         touch ./bin/log.txt
     fi
