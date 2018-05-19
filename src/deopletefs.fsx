@@ -181,9 +181,10 @@ module  FSharpIntellisence  =
             msgForDeoplete "Parsing did not finish..."
         else
             x.Value
-            |> Array.fold ( fun state x ->
-                let dt : JsonFormat = { word = x.Name; info = match x.DescriptionText with FSharpToolTipText xs -> List.map extractGroupTexts xs }
-                state + "\n" + JsonConvert.SerializeObject ( dt )
+            |> Array.map( fun x -> ( x.Name, match x.DescriptionText with FSharpToolTipText xs -> List.map extractGroupTexts xs ) )
+            |> Array.sortBy fst
+            |> Array.fold ( fun acc (a,b) ->
+                acc + "\n" + JsonConvert.SerializeObject( { word = a ; info = b } : JsonFormat )
                 ) ""
             |> fun s -> s.Trim()
             |> fun s -> Util.encode64 s
