@@ -1,6 +1,3 @@
-# ===========================================================================
-#  FILE    : build.bash
-#  AUTHOR  : callmekohei <callmekohei at gmail.com>
 #  License : MIT license
 # ===========================================================================
 
@@ -90,7 +87,7 @@ copy_dll_to_bin_folder() {
     local line
     while read -r line
     do
-        cp ${line} ./bin/
+        cp "${line}" ./bin/
     done
 }
 
