@@ -113,6 +113,8 @@ function copy_dll_to_bin_folder () {
 
 if [ -e ./bin/ ] ; then
     echo 'do nothing!'
+elif [ "$1" = "-g" ] ; then
+    create_exe_file_with_debug
 else
     mkdir ./bin/
     install_lib
