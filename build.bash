@@ -42,7 +42,7 @@ function install_lib () {
         nuget persimmon.script
     "
 
-    if ! type paket >/dev/null 2&>1 ; then
+    if ! type paket >/dev/null 2>&1 ; then
         download_paket_bootstrapper
         mono ./.paket/paket.exe init
         echo "${foo}" > ./paket.dependencies
