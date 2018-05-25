@@ -4,7 +4,7 @@
 #  License : MIT license
 # ===========================================================================
 
-#!/bin/bash
+#!/usr/bin/env bash
 
 # fit your file path
 FSX_PATH=./src/deopletefs.fsx
