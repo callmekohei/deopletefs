@@ -58,7 +58,7 @@ function install_lib () {
 
 
 function create_exe_file () {
-    declare -a local arr=(
+    local arr=(
         "${FSX_PATH}"
         --nologo
         --simpleresolution
@@ -74,7 +74,7 @@ function create_exe_file () {
 
 
 function create_exe_file_with_debug () {
-    declare -a local arr=(
+    local arr=(
         "${FSX_PATH}"
         --nologo
         --simpleresolution
@@ -120,7 +120,9 @@ else
     install_lib
     if [ "$?" = 0 ] ; then
         create_exe_file
-        cat "${Lib_PATH}" | arrange_text | copy_dll_to_bin_folder
-        touch ./bin/log.txt
+        if [ "$?" = 0 ] ; then
+            cat "${Lib_PATH}" | arrange_text | copy_dll_to_bin_folder
+            touch ./bin/log.txt
+        fi
     fi
 fi
