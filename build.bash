@@ -73,6 +73,22 @@ function create_exe_file () {
 }
 
 
+function create_exe_file_with_debug () {
+    declare -a local arr=(
+        "${FSX_PATH}"
+        --nologo
+        --simpleresolution
+        --out:./bin/$(basename "${FSX_PATH}" .fsx).exe
+        ### ===== enable print debug =====
+        --define:DEBUG
+        ### ===== crete debug symbol file (.mdb) =====
+        # --debug+
+        # --optimize-
+    )
+    fsharpc "${arr[@]}"
+}
+
+
 function arrange_text () {
     local line
     while read -r line
