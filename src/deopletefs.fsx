@@ -6,7 +6,8 @@
 
 namespace deopletefs
 
-#load @"../.paket/load/net471/main.group.fsx"
+// #load @"../.paket/load/net472/main.group.fsx"
+#load @"../.paket/load/netcoreapp2.1/main.group.fsx"
 open Microsoft.FSharp.Compiler
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Compiler.QuickParse
@@ -195,14 +196,14 @@ module  FSharpIntellisence  =
         dic.GetOrAdd( "filePath"    , postData.FilePath )                       |> ignore
         dic.GetOrAdd( "openCount"   , string(openCount(postData.Source)) )      |> ignore
 
+        let tmpLine = postData.Line
+        let tmpRow  = postData.Row
+
         let getOrAddDic (label:string) ( line:string) (col:int) =
             postData.Line <- line
             let partialName = QuickParse.GetPartialLongNameEx(line, col)
             dic.GetOrAdd( label, jsonStrings agent postData partialName ) |> ignore
 
-
-        let tmpLine = postData.Line
-        let tmpRow  = postData.Row
         postData.Row <- postData.Source.Split('\n').Length
 
         [
