@@ -121,7 +121,6 @@ else
     if [ "$?" = 0 ] ; then
         create_exe_file
         cat "${Lib_PATH}" | arrange_text | copy_dll_to_bin_folder
-        ### add log.txt
         touch ./bin/log.txt
     fi
 fi
