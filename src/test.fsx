@@ -141,11 +141,11 @@ let ``initialize`` = test {
     do! assertEquals expectedString resultString
 }
 
-let ``List - allPairs`` = test {
+let ``List - Cons`` = test {
     let json           = """{ "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
     let ListFuncs      = ( decode64( autocomplete json agent dic ) ).Split('\n') |> fun ary -> ary.[0]
     let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(ListFuncs).word
-    let expectedString = "allPairs"
+    let expectedString = "Cons"
     do! assertEquals expectedString resultString
 }
 
@@ -157,11 +157,11 @@ let ``stdin - Close`` = test {
     do! assertEquals expectedString resultString
 }
 
-let ``oneWordHints - abs`` = test {
+let ``oneWordHints - AbstractClassAttribute`` = test {
     let json           = """{ "Row" : 1 ,"Col": 1, "Line": "a", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
     let filteredByA    = ( decode64( autocomplete json agent dic ) ).Split('\n') |> fun ary -> ary.[0]
     let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(filteredByA).word
-    let expectedString = "abs"
+    let expectedString = "AbstractClassAttribute"
     do! assertEquals expectedString resultString
 }
 
