@@ -6,7 +6,7 @@
 
 namespace deopletefs
 
-#load @"../.paket/load/net471/main.group.fsx"
+#load @"../.paket/load/net472/main.group.fsx"
 open Microsoft.FSharp.Compiler
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Compiler.QuickParse
