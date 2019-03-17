@@ -6,16 +6,16 @@
 
 namespace deopletefs
 
-#load @"../.paket/load/net472/main.group.fsx"
-open Microsoft.FSharp.Compiler
-open Microsoft.FSharp.Compiler.SourceCodeServices
-open Microsoft.FSharp.Compiler.QuickParse
-open Newtonsoft.Json
-
 open System
 open System.Collections.Concurrent
 open System.Diagnostics
 open System.Text.RegularExpressions
+
+#load @"../.paket/load/netcoreapp3.0/main.group.fsx"
+open FSharp.Compiler
+open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.QuickParse
+open Newtonsoft.Json
 
 
 type PostData   = { mutable Row:int; Col:int; mutable Line:string; FilePath:string; Source:string; Init:string }
