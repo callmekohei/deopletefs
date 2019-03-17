@@ -4,16 +4,18 @@
 //  License : MIT license
 // ===========================================================================
 
+#load @"../.paket/load/net471/main.group.fsx"
+#r "../packages/FSharp.Core/lib/net45/FSharp.Core.dll"
+#r "../bin/deopletefs.exe"
+
 open System
 open System.IO
 
-#load @"../.paket/load/net471/main.group.fsx"
 open Newtonsoft.Json
 open System.Reflection
 open Persimmon
 open UseTestNameByReflection
 
-#r "../bin/deopletefs.exe"
 open deopletefs.Util
 open deopletefs.InteractiveConsole
 open deopletefs.FSharpIntellisence
