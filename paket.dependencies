@@ -2,6 +2,7 @@
         source https://www.nuget.org/api/v2
         generate_load_scripts: true
 
+        nuget NETStandard.Library -Version 2.0.3
         nuget FSharp.Core
         nuget fsharp.compiler.service
         nuget newtonsoft.json

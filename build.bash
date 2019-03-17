@@ -38,6 +38,7 @@ function install_lib () {
         source https://www.nuget.org/api/v2
         generate_load_scripts: true
 
+        nuget NETStandard.Library -Version 2.0.3
         nuget FSharp.Core
         nuget fsharp.compiler.service
         nuget newtonsoft.json
@@ -60,11 +61,23 @@ function install_lib () {
 
 
 function create_exe_file () {
+
+    local corlib="packages/NETStandard.Library/build/netstandard2.0/ref/mscorlib.dll"
+    local runtime="packages/NETStandard.Library/build/netstandard2.0/ref/System.Runtime.dll"
+    local netstandard="packages/NETStandard.Library/build/netstandard2.0/ref/netstandard.dll"
+    local fsharpCore="packages/FSharp.Core/lib/net45/FSharp.Core.dll"
+
+
     local arr=(
         "${FSX_PATH}"
         --nologo
         --simpleresolution
         --out:./bin/$(basename "${FSX_PATH}" .fsx).exe
+        --noframework
+        --reference:$corlib
+        --reference:$runtime
+        --reference:$netstandard
+        --reference:$fsharpCore
         ### ===== enable print debug =====
         # --define:DEBUG
         ### ===== crete debug symbol file (.mdb) =====
