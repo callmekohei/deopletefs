@@ -31,6 +31,7 @@ let decode64 (base64String:string) =
 let ``test of angleBracket`` = test {
     // do! assertEquals "abc" ( angleBracket "abc" )
     // do! assertEquals "abc" ( angleBracket "typeof<" )
+    do! assertEquals "Systemmmm"      ( angleBracket "typeof<System" )
     do! assertEquals "System"      ( angleBracket "typeof<System" )
     do! assertEquals "System."     ( angleBracket "typeof<System." )
     do! assertEquals "System.Math" ( angleBracket "typeof<System.Math" )

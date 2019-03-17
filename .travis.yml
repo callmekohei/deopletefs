@@ -12,9 +12,10 @@ addons:
 
 script:
     - bash ./build.bash
-    - fsharpi ./src/test.fsx
+    - bash ./test.bash
 
 after_failure:
+    - echo 'test fail'
 
 after_success:
     # prepare
