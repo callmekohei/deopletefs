@@ -14,6 +14,8 @@ script:
     - bash ./build.bash
     - fsharpi ./src/test.fsx
 
+after_failure:
+
 after_success:
     # prepare
     - openssl aes-256-cbc -K $encrypted_b811b6a1fc44_key -iv $encrypted_b811b6a1fc44_iv -in deploy_key.enc -out ~/.ssh/id_rsa -d
