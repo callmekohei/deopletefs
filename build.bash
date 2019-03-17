@@ -35,8 +35,10 @@ function download_paket_bootstrapper () {
 function install_lib () {
 
     local foo="
-        generate_load_scripts: true
         source https://www.nuget.org/api/v2
+        generate_load_scripts: true
+
+        nuget FSharp.Core
         nuget fsharp.compiler.service
         nuget newtonsoft.json
         nuget persimmon.script
