@@ -4,39 +4,39 @@ sudo: true
 matrix:
   include:
 
-    - mono: latest
-      os: osx
-      osx_image: latest
-    - mono: weekly
-      os: osx
-    - mono: nightly
-      os: osx
+  - mono: latest
+    os: osx
+    osx_image: latest
+  - mono: weekly
+    os: osx
+  - mono: nightly
+    os: osx
 
-    # Mono 5.x
-    # - mono: 5.18.0 # build error
-      # os: osx
-    - mono: 5.16.0
-      os: osx
-    - mono: 5.14.0
-      os: osx
-    - mono: 5.12.0
-      os: osx
-    # build error
-    # - mono: 5.8.1
-      # os: osx
-    - mono: 5.10.0
-      os: osx
-    - mono: 5.8.0
-      os: osx
-    - mono: 5.4.1
-      os: osx
-    - mono: 5.4.0
-      os: osx
+  # Mono 5.x
+  # - mono: 5.18.0 # build error
+    # os: osx
+  - mono: 5.16.0
+    os: osx
+  - mono: 5.14.0
+    os: osx
+  - mono: 5.12.0
+    os: osx
+  # build error
+  # - mono: 5.8.1
+    # os: osx
+  - mono: 5.10.0
+    os: osx
+  - mono: 5.8.0
+    os: osx
+  - mono: 5.4.1
+    os: osx
+  - mono: 5.4.0
+    os: osx
 
 addons:
   homebrew:
-    packages: paket
-    update: true
+  packages: paket
+  update: true
 
 script:
   - bash ./build.bash
@@ -49,23 +49,23 @@ after_success:
   - echo 'success!'
   - ls -al ./bin/
   # prepare
-    - openssl aes-256-cbc -K $encrypted_b811b6a1fc44_key -iv $encrypted_b811b6a1fc44_iv -in deploy_key.enc -out ~/.ssh/id_rsa -d
-    - chmod 600 ~/.ssh/id_rsa
-    - echo -e "Host github.com"                >> ~/.ssh/config
-    - echo -e "\n\tUser git"                   >> ~/.ssh/config
-    - echo -e "\n\tStrictHostKeyChecking no"   >> ~/.ssh/config
-    - echo -e "\n\tIdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
-    - echo -e "\n\tIdentitiesOnly yes"         >> ~/.ssh/config
-    - echo -e "\n\tForwardAgent yes"           >> ~/.ssh/config
-    - git config --global user.email "callmekohei@gmail.com"
-    - git config --global user.name "callmekohei"
-    # git operations
-    - cd ..
-    - git clone git@github.com:callmekohei/deoplete-fsharp-bin.git
-    - rm -rf ./deoplete-fsharp-bin/bin_deopletefs
-    - cp -rf ./deopletefs/bin ./deoplete-fsharp-bin/
-    #
-    - cd ./deoplete-fsharp-bin
-    - git add --all
-    - git commit -m "by Travis CI (JOB $TRAVIS_JOB_NUMBER)"
-    - git push origin master
+  - openssl aes-256-cbc -K $encrypted_b811b6a1fc44_key -iv $encrypted_b811b6a1fc44_iv -in deploy_key.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - echo -e "Host github.com"          >> ~/.ssh/config
+  - echo -e "\n\tUser git"           >> ~/.ssh/config
+  - echo -e "\n\tStrictHostKeyChecking no"   >> ~/.ssh/config
+  - echo -e "\n\tIdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+  - echo -e "\n\tIdentitiesOnly yes"       >> ~/.ssh/config
+  - echo -e "\n\tForwardAgent yes"       >> ~/.ssh/config
+  - git config --global user.email "callmekohei@gmail.com"
+  - git config --global user.name "callmekohei"
+  # git operations
+  - cd ..
+  - git clone git@github.com:callmekohei/deoplete-fsharp-bin.git
+  - rm -rf ./deoplete-fsharp-bin/bin_deopletefs
+  - cp -rf ./deopletefs/bin ./deoplete-fsharp-bin/
+  #
+  - cd ./deoplete-fsharp-bin
+  - git add --all
+  - git commit -m "by Travis CI (JOB $TRAVIS_JOB_NUMBER)"
+  - git push origin master
