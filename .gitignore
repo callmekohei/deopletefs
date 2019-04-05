@@ -8,8 +8,8 @@ bin/
 !deploy_key.enc
 packages/
 paket-files/
-!paket.dependencies
-!paket.lock
+paket.dependencies
+paket.lock
 !src/deopletefs.fsx
 !src/test.fsx
 
