@@ -13,17 +13,16 @@ matrix:
     os: osx
 
   # Mono 5.x
-  # - mono: 5.18.0 # build error
-    # os: osx
+  - mono: 5.18.0
+    os: osx
   - mono: 5.16.0
     os: osx
   - mono: 5.14.0
     os: osx
   - mono: 5.12.0
     os: osx
-  # build error
-  # - mono: 5.8.1
-    # os: osx
+  - mono: 5.8.1
+    os: osx
   - mono: 5.10.0
     os: osx
   - mono: 5.8.0
