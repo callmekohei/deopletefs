@@ -136,9 +136,6 @@ stdout.WriteLine "\n===== autocomplete check ====="
 let initialize_deopleteExe () =
   let json = """{ "Row" : -9999 ,"Col": 1, "Line": "", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"true"}"""
   let resultString = """{"word":"finish initialize!","info":[[""]]}"""
-  // replyer.Send(json)
-  // wait for lunch time :-)  It's imortant!
-  // System.Threading.Thread.Sleep 10000
   check (decode64( replyer.sendRecieve(json).Data )) resultString
 
 initialize_deopleteExe ()
@@ -146,8 +143,6 @@ initialize_deopleteExe ()
 
 let List_Cons () =
     let json           = """{ "Row" : 1 ,"Col": 5, "Line": "List.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    // replyer.Send(json)
-    // System.Threading.Thread.Sleep 500
     let ListFuncs      = ( decode64( replyer.sendRecieve(json).Data ) ).Split('\n') |> fun ary -> ary.[0]
     let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(ListFuncs).word
     let expectedString = "Cons"
@@ -156,8 +151,6 @@ List_Cons ()
 
 let stdin_Close =
     let json           = """{ "Row" : 1 ,"Col": 6, "Line": "stdin.", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    // replyer.Send(json)
-    // System.Threading.Thread.Sleep 500
     let stdinMethods   = ( decode64( replyer.sendRecieve(json).Data ) ).Split('\n') |> fun ary -> ary.[0]
     let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(stdinMethods).word
     let expectedString = "Close"
@@ -165,8 +158,6 @@ let stdin_Close =
 
 let oneWordHints_AbstractClassAttribute =
     let json           = """{ "Row" : 1 ,"Col": 1, "Line": "a", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    // replyer.Send(json)
-    // System.Threading.Thread.Sleep 500
     let filteredByA    = ( decode64( replyer.sendRecieve(json).Data ) ).Split('\n') |> fun ary -> ary.[0]
     let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(filteredByA).word
     let expectedString = "AbstractClassAttribute"
@@ -175,8 +166,6 @@ let oneWordHints_AbstractClassAttribute =
 
 let attributeHints_AbstractClassAttribute =
     let json           = """{ "Row" : 1 ,"Col": 2, "Line": "[<", "FilePath" : "./dummy.fsx", "Source" : "", "Init":"false"}"""
-    replyer.Send(json)
-    // System.Threading.Thread.Sleep 500
     let attributeA     = ( decode64( replyer.sendRecieve(json).Data ) ).Split('\n') |> fun ary -> ary.[0]
     let resultString   = JsonConvert.DeserializeObject<deopletefs.JsonFormat>(attributeA).word
     let expectedString = "AbstractClassAttribute"
