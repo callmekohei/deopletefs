@@ -18,7 +18,7 @@
 $ git clone deapth -1 https://github.com/callmekohei/deopletefs
 $ cd ./deopletefs/
 $ bash build.bash
-$ fsharpi ./src/test.fsx
+$ fsharpi ./test.fsx
 ```
 
 ## Communication protocol
