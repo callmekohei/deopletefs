@@ -125,6 +125,22 @@ function copy_dll_to_bin_folder () {
     done
 }
 
+function checkBuild () {
+
+
+  ls -al ./bin/
+
+  local deopletefs_exe
+  deopletefs_exe='./bin/deopletefs.exe'
+
+  if [ -e $deopletefs_exe ] ; then
+    exit 0
+  else
+    exit -1
+  fi
+
+}
+
 
 if [ -e ./bin/ ] ; then
     echo 'do nothing!'
@@ -140,4 +156,5 @@ else
             touch ./bin/log.txt
         fi
     fi
+    checkBuild
 fi

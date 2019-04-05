@@ -1,24 +1,54 @@
 language: csharp
+sudo: true
 
-os: osx
-osx_image: latest
-mono: latest
+matrix:
+  include:
+
+    - mono: latest
+      os: osx
+      osx_image: latest
+    - mono: weekly
+      os: osx
+    - mono: nightly
+      os: osx
+
+    # Mono 5.x
+    # - mono: 5.18.0 # build error
+      # os: osx
+    - mono: 5.16.0
+      os: osx
+    - mono: 5.14.0
+      os: osx
+    - mono: 5.12.0
+      os: osx
+    # build error
+    # - mono: 5.8.1
+      # os: osx
+    - mono: 5.10.0
+      os: osx
+    - mono: 5.8.0
+      os: osx
+    - mono: 5.4.1
+      os: osx
+    - mono: 5.4.0
+      os: osx
 
 addons:
   homebrew:
-    packages:
-    - paket
+    packages: paket
     update: true
 
 script:
-    - bash ./build.bash
-    - bash ./test.bash
+  - bash ./build.bash
+  - fsharpi ./test.fsx
 
 after_failure:
-    - echo 'test fail'
+  - echo 'test fail'
 
 after_success:
-    # prepare
+  - echo 'success!'
+  - ls -al ./bin/
+  # prepare
     - openssl aes-256-cbc -K $encrypted_b811b6a1fc44_key -iv $encrypted_b811b6a1fc44_iv -in deploy_key.enc -out ~/.ssh/id_rsa -d
     - chmod 600 ~/.ssh/id_rsa
     - echo -e "Host github.com"                >> ~/.ssh/config
