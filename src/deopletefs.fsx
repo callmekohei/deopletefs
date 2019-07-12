@@ -15,6 +15,7 @@ open System.Text.RegularExpressions
 open FSharp.Compiler
 open FSharp.Compiler.SourceCodeServices
 open FSharp.Compiler.QuickParse
+open FSharp.Compiler.Text
 open Newtonsoft.Json
 
 
@@ -50,7 +51,7 @@ type LanguageAgent(dirtyNotify) =
 
 
     let getDecls (postData:PostData, partialName) = async {
-            let untyped, parsed = parseWithTypeInfo (postData.FilePath, postData.Source)
+            let untyped, parsed = parseWithTypeInfo (postData.FilePath, SourceText.ofString postData.Source)
             return! parsed.GetDeclarationListInfo(Some untyped, postData.Row, postData.Line, partialName, (fun () -> []))
         }
 
@@ -79,7 +80,7 @@ type LanguageAgent(dirtyNotify) =
 
     member x.GetCheckerOptions( postData ) =
         Async.RunSynchronously (
-            checker.GetProjectOptionsFromScript( postData.FilePath, postData.Source, fakeDateTimeRepresentingTimeLoaded postData.FilePath)
+            checker.GetProjectOptionsFromScript( postData.FilePath, SourceText.ofString postData.Source, fakeDateTimeRepresentingTimeLoaded postData.FilePath)
             , timeout = ServiceSettings.maximumTimeout
         )
 

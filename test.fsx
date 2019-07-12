@@ -124,7 +124,8 @@ module myUtil =
 module testPart =
   open  myUtil
 
-  let mono  = "/usr/local/Cellar/mono/5.18.0.268/bin/mono"
+  // let mono  = "/usr/local/Cellar/mono/5.18.0.268/bin/mono"
+  let mono  = "mono"
   let args  = "./bin/deopletefs.exe"
   let workdir = "./"
   let replyer = Interaction(mono,args,workdir)
