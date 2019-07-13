@@ -2,6 +2,10 @@
 //  FILE    : deopletefs.fsx
 //  AUTHOR  : callmekohei <callmekohei at gmail.com>
 //  License : MIT license
+//  Respect : Don Syme       : https://github.com/fsharp/FSharp.Compiler.Service/blob/master/fcs/samples/EditorService/Program.fs 
+//  Respect : Tomas Petricek : https://github.com/fsharp/zarchive-fsharpbinding/blob/master/FSharp.AutoComplete/Program.fs 
+//                           : https://github.com/fsharp/zarchive-fsharpbinding/blob/master/FSharp.CompilerBinding/LanguageService.fs
+//  Respect : Japanese F#er  : https://gitter.im/fsugjp/public
 // ===========================================================================
 
 namespace deopletefs
